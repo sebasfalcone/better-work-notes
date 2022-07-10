@@ -266,3 +266,26 @@ You've got a 8 on Spanish
 - Look at the `student` field and how it's used in the `teach` method. We can say that `Student` class is a dependency for professor. If `takeTest` changes, the professor's code will break. However, the `student` field is always accessible to any method of the `Professor`, the `Student` class is not just a dependency but also an association.
 
 ### Aggregation
+![Aggregation](./Resources/Aggregation.jpeg)
+- Is a specialized type of association that represents "one-to-many", "many-to-many" or "whole-part" relations between multiple objects.
+- Usually, under aggregation, an object has a set of other objects and servers as a container or collection. The component can exist without the container and can be linked to several containers at the same time.
+
+### Composition
+![Composition](./Resources/Composition.jpeg)
+- Is a specific kind of aggregation, whereas object is composed of one or more instances of the other. The distinction between this and other relations is that the component can only exist as part of the container.
+
+
+## Summary
+- **Dependency**: Class А can be affected by changes in class B.
+- **Association**: Object А knows about object B. Class A depends
+on B.
+- **Aggregation**: Object А knows about object B, and consists of B.
+Class A depends on B.
+- **Composition**: Object А knows about object B, consists of B, and
+manages B's life cycle. Class A depends on B.
+B. Objects A can be treated as B. Class A depends on B.
+- **Inheritance**: Class А inherits interface and implementation of
+class B but can extend it. Objects A can be treated as B. Class
+A depends on B
+
+![Relations_summary](./Resources/Relations_summary.jpeg)
