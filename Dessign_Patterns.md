@@ -1,5 +1,6 @@
 # Table of contents
 
+- [Table of contents](#table-of-contents)
 - [Design patterns](#design-patterns)
 - [Object Oriented Programming - OOP](#object-oriented-programming---oop)
   - [Basics of OOP](#basics-of-oop)
@@ -25,7 +26,14 @@
   - [Classification of patterns](#classification-of-patterns)
 - [Design principles](#design-principles)
   - [Encapsulate what varies](#encapsulate-what-varies)
-  
+    - [Encapsulation on a method level](#encapsulation-on-a-method-level)
+    - [Encapsulation on a class level](#encapsulation-on-a-class-level)
+  - [Program to an interface, not an implementation](#program-to-an-interface-not-an-implementation)
+    - [Example](#example)
+  - [Composition over inheritance](#composition-over-inheritance)
+    - [Example](#example)
+  - [SOLID principle](#solid-principle)
+
 # Design patterns
 
 # Object Oriented Programming - OOP
@@ -370,4 +378,151 @@ We can divide patterns in three groups:
 
 > **Identify the aspects of your application that vary and separate them from what stays the same.**
 
+The goal of this principle is to minimize the effect caused by changes. You can isolate parts of the program that vary in independent modules, protecting the rest of the code from adverse effects.
 
+### Encapsulation on a method level
+Imagine you're making an e-commerce website. And you implement a `getOrderTotal` method that calculates a grand total for the order, including taxes.
+
+We can anticipate that tax-related code might need to change in the future. Overtime, the actual formula for tax calculation may change due to new laws or regulations. As a result, you'll need to change the `getOrderTotal` method quite often. But even the method's name suggests that it doesn't care about *how* taxes are calculated:
+
+```
+class Commerce 
+{
+    public:
+        float getOrderTotal(Order& order)
+        {
+            float total = 0;
+            float totalPreTax = order.sumAllProducts();
+            
+            if("EEUU" == order.country())
+            {
+                total = totalPreTax * 1.07;
+            }
+            else if ("EU" == order.country())
+            {
+                total = totalPreTax * 1.20;
+            }
+            else
+            {
+               total = totalPreTax;
+            }
+                
+            return total;
+        }
+};
+
+// Tax calculation is mixed with the rest of the method's code
+```
+You can extract the tax calculation logic into a separated method, hiding it from the original one:
+```
+class Commerce 
+{
+    public:
+        float addTax(float preTaxValue, Order& order)
+        {
+            if("EEUU" == order.country())
+            {
+                total = totalPreTax * 1.07;
+            }
+            else if ("EU" == order.country())
+            {
+                total = totalPreTax * 1.20;
+            }
+            else
+            {
+                total = totalPreTax;    
+            }
+                
+            return total;    
+        }
+        
+        float getOrderTotal(Order& order)
+        {
+            float totalPreTax = order.sumAllProducts();
+            
+            return addTax(totalPreTax, order);
+        }
+};
+
+// You can get the tax rate by calling a designation method.
+```
+> NOTE: see that we respect the [ROV](https://shaharmike.com/cpp/rvo/)
+
+Tax-related changes become isolated inside a single method. Moreover, if the tax calculation logic becomes too complicated, it's now easier to move it to a separated class.
+
+### Encapsulation on a class level
+Over time you add more and more responsibilities to a method which used to do a simple thing. And this added behaviors eventually blur the primary responsibility of the containing class. Extracting everything to a new class might make things much more clear and simple.
+
+![Encapsulation_class_level](./Resources/Encapsulation_class_level.jpeg)
+
+## Program to an interface, not an implementation
+You can tell that the design is flexible enough if you can easily extend it without breaking any existing code. A `Cat` that can eat any food is more flexible that one that can eat just sausages.
+
+When you want to make two classes collaborate, you can start by making one of them dependent on the other, but a more flexible way is to set up collaboration between objects:
+1. Determine what exactly one object needs from the other (Which methods does it execute?).
+2. Describe these methods in a new interface or abstract class.
+3. Make the class that is a dependency implement this interface.
+4. Make the second class dependent on this interface rather than on the concrete class. You can make it work with objects of the original class, but the connection is now much more flexible.
+
+![Interface_not_implementation_principle](./Resources/Interface_not_implementation/Principle.jpeg)
+
+At first glance it seems that you only created a more complicated code, but when you or someone wants do add more functionality, this will come in handy.
+
+### Example
+Say you created a *software development company simulator*. You have different classes that represent various employee types:
+
+![Interface_not_implementation_tightly_coupled](./Resources/Interface_not_implementation/Tightly_coupled.jpeg)
+
+The `Company` class is tightly coupled to a concrete class of employees. Despite the difference in their implementation, we can generalize various work-related methods and extract a common interface for all employee classes.
+
+Also, we can apply polymorphism inside the `Company` class, treating various employee objects via the `Employee` interface:
+
+![Interface_not_implementation_polymorphism](./Resources/Interface_not_implementation/Polymorphism.jpeg)
+
+The `Company` class remains coupled to the employee classes. This is bad, if we introduce new types of companies that work with other types of employees, we'll need to override most of the `Company` class instead of reusing code.
+
+To solve this problem, we declare the method for getting employees as *abstract*. Each company will implement this method differently, creating only those employees that it needs.
+![Interface_not_implementation_factory_method](./Resources/Interface_not_implementation/Factory_method.jpeg)
+
+Now, the `Company` class become independent from various employee classes and can extend this class to introduce new types of companies and employees while still reusing a portion of the base company class. Extending the base company doesn't break any existing code that already relies on it.
+
+> NOTE: This is a pattern! Refereed as [Factory method](https://refactoring.guru/design-patterns/factory-method) (more on that latter).
+
+## Composition over inheritance
+Inheritance is the most obvious and easy way of reusing code between classes. You have two classes with the same code, create a common base class for those two and move the similar code into it.
+
+Unfortunately, inheritance comes with caveats that become apparent when you program has tons of classes:
+
+- **A subclass can't reduce the interface of a supperclass**:
+   - You have yo implement all abstract methods of the parent class, even if you won't use them.
+- **When overriding methods you need to make sure that the new behavior is compatible with the base one**:
+   - Objects of the subclass may be passed to any code that expects objects of the superclass and you don't want that code to break.
+- **Inheritance breaks encapsulation of the superclass**:
+   - Internal details of the parent class become available to the subclass.
+- **Subclasses are tightly coupled to superclasses**:
+   - Any change in a superclass may break the functionality of subclasses.
+- **Trying to reuse code through inheritance can lead to creating parallel inheritance hierarchies**:
+   - Inheritance usually takes place in a single dimension. But when there are two or more dimensions, you have to create lots of class combinations, bloating the class hierarchy.
+
+An alternative to *inheritance* is *composition*.
+   - Inheritance represent the "is a" of a relationship (a car *is a* transport).
+   - Composition represent the "has a" of a relationship (a car *has an* engine).
+
+> NOTE: this principle also applies to aggregation.
+
+### Example
+You need to create a catalog app for a car manufacturer. The company makes both cars and trucks; they can be either electrical or gas; all models have either manual control or autopilot.
+
+![Composition_over_inheritance_inheritance](./Resources/Composition_over_inheritance/Inheritance.jpeg)
+
+Each additional parameter results in multiplying the number of subclasses. There's a lot of duplicated code between subclasses, because you can't extend two classes at the same time.
+
+With composition, instead of a car objects implementing a behavior on their own, they can delegate it to other objects.
+
+The added benefit is that you can replace a behavior at runtime. You can replace an engine object linked to a car object just by assigning a different engine object to the car.
+
+![Composition_over_inheritance_composition](./Resources/Composition_over_inheritance/Composition.jpeg)
+
+> NOTE: this structure of classes resembles the [Strategy pattern](https://refactoring.guru/design-patterns/strategy).
+
+## SOLID principle
