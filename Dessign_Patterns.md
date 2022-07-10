@@ -190,5 +190,79 @@ In addition to *inheritance* and *implementation* there are other types of relat
 
 ### Association
 ![Association](./Resources/Association.jpeg)
-- Is a relationship in which one objects uses or interacts with another.
+- Is a relationship in which one objects uses or interacts with another. Is a specialized kind of dependency, where an object always has access to the objects with which interacts, whereas simple dependency doesn't establish a permanent link.
 
+- Lets look a combined example to understand the differences between *association* and *dependency*. \
+Imagine we have a `Professor` class:
+```
+#include <iostream>
+#include <random>
+#define MAX_GRADE 10
+
+class Course 
+{
+    private:
+        int m_performance;
+        std::string m_name;
+        
+    public:
+        Course(int performance, const char * name) : m_performance(performance), m_name(name) {}
+        
+        int test()
+        {
+            return rand()%(m_performance - 1);  
+        }
+
+        // This method is a consumer (doesn't modify fields of the class)
+        // So const keyword must be used at the end        
+        void printCourseName() const
+        {
+            std::cout << m_name << std::endl;    
+        }
+};
+
+class Student 
+{
+    public:
+        int takeTest(int performance)
+        {
+            return performance%(MAX_GRADE-1);   
+        }
+};
+
+class Professor 
+{
+    Student student;
+
+    public:
+        void teach(Course& course) 
+        { 
+            std::cout << "You've got a " << student.takeTest(course.test()) << " on "; 
+            course.printCourseName();
+        }
+};
+
+int main()
+{
+    Professor professor;
+    Course mathematics(1550, "Mathematics");
+    Course geography(1700, "Geography");
+    Course spanish(2000, "Spanish");
+    
+    professor.teach(mathematics);
+    professor.teach(geography);
+    professor.teach(spanish);
+}
+```
+```
+output:
+You've got a 8 on Mathematics
+You've got a 6 on Geography
+You've got a 8 on Spanish
+```
+
+- Look at the `teach` method. It takes `Course` class as an argument, which then is used in the body of the method. If someone changes the `test` method of the `Course` class (alters its name, adds required parameters, etc), our code will break. This is called a dependency.
+
+- Look at the `student` field and how it's used in the `teach` method. We can say that `Student` class is a dependency for professor. If `takeTest` changes, the professor's code will break. However, the `student` field is always accessible to any method of the `Professor`, the `Student` class is not just a dependency but also an association.
+
+### Aggregation
