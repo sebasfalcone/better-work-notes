@@ -1,3 +1,31 @@
+# Table of contents
+
+- [Design patterns](#design-patterns)
+- [Object Oriented Programming - OOP](#object-oriented-programming---oop)
+  - [Basics of OOP](#basics-of-oop)
+  - [Objects and classes](#objects-and-classes)
+  - [Class hierarchies](#class-hierarchies)
+  - [Pillars of OOP](#pillars-of-oop)
+    - [Abstraction](#abstraction)
+    - [Encapsulation](#encapsulation)
+      - [C++ example](#c-example)
+    - [Inheritance](#inheritance)
+    - [Polymorphism](#polymorphism)
+  - [Relations Between objects](#relations-between-objects)
+    - [Dependency](#dependency)
+    - [Association](#association)
+    - [Aggregation](#aggregation)
+    - [Composition](#composition)
+  - [Summary](#summary)
+- [Software design principles](#software-design-principles)
+  - [Code reuse](#code-reuse)
+- [Design patterns](#design-patterns)
+  - [What's a Design Pattern?](#whats-a-design-pattern)
+  - [What does the patter consist of?](#what-does-the-patter-consist-of)
+  - [Classification of patterns](#classification-of-patterns)
+- [Design principles](#design-principles)
+  - [Encapsulate what varies](#encapsulate-what-varies)
+  
 # Design patterns
 
 # Object Oriented Programming - OOP
@@ -274,7 +302,6 @@ You've got a 8 on Spanish
 ![Composition](./Resources/Composition.jpeg)
 - Is a specific kind of aggregation, whereas object is composed of one or more instances of the other. The distinction between this and other relations is that the component can only exist as part of the container.
 
-
 ## Summary
 - **Dependency**: Class А can be affected by changes in class B.
 - **Association**: Object А knows about object B. Class A depends
@@ -289,3 +316,58 @@ class B but can extend it. Objects A can be treated as B. Class
 A depends on B
 
 ![Relations_summary](./Resources/Relations_summary.jpeg)
+
+# Software design principles
+Before going deep on design patterns, lets discuss the process of designing software architecture.
+
+## Code reuse
+Is one of the most common ways to reduce development costs. 
+
+Making existing code work in a new context usually takes extra effort. You should avoid tight coupling between components, dependencies on concrete classes instead of interfaces, hard-coded operations.
+
+Three levels of reuse:
+- **Lowest level**: Classes
+   - You reuse libraries, container and maybe some class "teams" like container/iterator.
+
+- **Middle level**: Patterns
+   - Smaller and more abstract that frameworks. They're a description about how a couple of classes can relate to and interact with each other.
+
+- **High level**: Frameworks
+   - They identify the key abstractions for solving a problem, represent them by classes and define relationships between them. 
+   - Lets you define custom behavior and it will call you when it's your turn to do something.
+
+What is good about the middle layer is that offers reuse but less risk. Building a framework is high-risk and a significant investment. Patterns let you reuse design ideas and concepts independently of concrete code.
+
+
+# Design patterns
+
+## What's a Design Pattern?
+Are solutions to commonly occurring problems in software design. They are like pre-made blueprints that you can customize to solve a recurring design problem in your code.
+
+The pattern is not an specific piece of code, but a general concept. You can follow the pattern details and implement a solution that suits the realities of your own program.
+
+## What does the patter consist of?
+- **Intent** of the patter briefly describes both the problem and the solution.
+- **Motivation** further explains the problem and the solution the pattern makes possible.
+- **Structure** of classes shows each part of the pattern and how they are related.
+- **Code example** in one or more programming languages.
+
+## Classification of patterns
+Design patterns differ by their complexity, level of detail and scale of applicability to the entire system being designed.
+
+- The most basic and low-level patterns are called *idioms* and they usually apply only to a  single programming language.
+
+- The most universal and high-level patterns are called *architectural patterns*. These patterns can implement these patterns in virtually any language.
+
+We can divide patterns in three groups:
+- **Creational patterns** provide object creation mechanisms that increase flexibility and reuse of existing code.
+- **Structural patterns** explain how to assemble objects and classes into larger structures, while keeping the structures flexible and efficient.
+- **Behavioral patterns** take care of effective communication and the assignment of responsibilities between objects.
+
+# Design principles
+
+## Encapsulate what varies
+
+> **Identify the aspects of your application that vary and separate them from what stays the same.**
+
+
