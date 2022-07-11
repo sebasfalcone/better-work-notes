@@ -33,6 +33,17 @@
   - [Composition over inheritance](#composition-over-inheritance)
     - [Example](#example)
   - [SOLID principle](#solid-principle)
+    - [Single responsibility principle](#single-responsibility-principle)
+      - [Example](#example)
+    - [Open / Closed principle](#open--closed-principle)
+      - [Example](#example)
+    - [Liskow substitution principle](#liskow-substitution-principle)
+      - [Checklist](#checklist)
+      - [Example](#example)
+    - [Interface segregation principle](#interface-segregation-principle)
+      - [Example](#example)
+    - [Dependency Inversion Principle](#dependency-inversion-principle)
+      - [Example](#example)
 
 # Design patterns
 
@@ -526,3 +537,138 @@ The added benefit is that you can replace a behavior at runtime. You can replace
 > NOTE: this structure of classes resembles the [Strategy pattern](https://refactoring.guru/design-patterns/strategy).
 
 ## SOLID principle
+As all things in life, don't take things as a dogma. This principles are not always respected, even in successful software products, but is good to think of them whenever you write code.
+
+SOLID is a mnemonic for five design principles, intended to make software design more understandable, flexible and maintainable.
+
+### Single responsibility principle
+> A class should have one reason to change
+
+Try to make every class responsible for a single part of the functionality provided by the software, and make that responsibility entirely encapsulated (*hidden within*) by the class.
+
+If a class does too many things, you have to change it every time one of these things change. While doing this you are risking other parts of the class which you didn't intend to change.
+
+#### Example
+The `Employee` class has several reasons to change. One might be related to the main job of the class, that is *managing employee data*. Another reason is that the format of the *timeSheet* may change, requiring you to change the code withing the class.
+
+![Single_responsibility_principle_bad](./Resources/SOLID/Single_responsibility_principle_bad.jpeg)
+
+Solve the problem by moving the behavior related to printing timesheet reports into a separated class.
+
+![Single_responsibility_principle_good](./Resources/SOLID/Single_responsibility_principle_good.jpeg)
+
+### Open / Closed principle
+> Classes should be open for extension but closed for modification.
+
+The idea of this principle is to keep existing code from breaking when you implement new features.
+
+A class is *open* if you can extend it, produce a subclass and do whatever you want with it (add new methods or fields, override base behavior, etc).
+
+After this, the class is *closed* if it's 100% ready to be used by other classes (the interface is clearly defined and won't change).
+
+If a class is already developed, tested and reviewed, changing its code is risky. Instead, you can create a subclass that overrides parts of the original that you want to behave differently.
+
+> NOTE: obviously if there is a bug, go and fix it. Child classes shouldn't be responsible for the parent's issue.
+
+#### Example
+
+You have an e-commerce app with an `Order` class that calculates shipping costs and all shipping methods are hardcoded inside the class. If you need to add a new shipping  method, you have to change the code of the `Order` class and risk breaking it.
+
+![Open_closed_bad](./Resources/SOLID/Open_closed_bad.jpeg)
+
+You can solve the problem by applying the [*Strategy pattern*](https://refactoring.guru/design-patterns/strategy). Start by extracting shipping methods into separate classes with common interface.
+
+![Open_closed_bad](./Resources/SOLID/Open_closed_good.jpeg)
+
+Now, when you implement a new shipping method, you can derive new class from the `Shipping` interface without touching any of the code in the `Order` class.
+
+As a bonus, this solution let you move the delivery time calculation to more relevant classes, according to the [*single responsibility principle*](#single-responsibility-principle).
+
+### Liskow substitution principle
+> When extending a class, remember that you should be able to pass objects of the subclass in place of objects of the parent class without breaking the client code.
+
+This means that the subclass should remain compatible with the behavior of the superclass. When overriding a method, extend the base behavior instead of replacing it with something else.
+
+This principle is a set of checks that help predict whether a subclass remains compatible with the code that was working with the superclass. This is critical when developing libraries and frameworks, because your classes are going to be used by other people whose code you can't directly access and change.
+
+#### Checklist
+- Parameter types in a method of a subclass should *match* or be *more abstract* than parameter types in the method of the supperclass:
+   - There's a class with a method that's supposed to feed cats `feed(Cat c)`. Client code always passes cat objects into this method.
+      - **GOOD**: You create a subclass that overrode the method so that it can feed any animal (a supperclass of cats): `feed(Animal c)`. Now if you pass an object to the client code, everything would still work. The method can feed all animals, so it can still feed any cat passed by the client.
+      - **BAD**: You create another subclass and restricted the feeding method to only accept Bengal cats (a subclass if cats): `feed(BengalCat c)`. What will happen to the client code if oy link it with an object like this instead of with the original class? Since the method can only feed a specific breed of cats, it won't serve generic cats passed by the client, breaking all related functionality.
+
+- The return type in a method of a subclass should *match* or be a *subtype* of the return type in the method of the superclass (requirements for a return type are inverse of requirements for parameter types):
+   - You have a class with a method `Cat butCat();`. The client code expects to receive any cat as result of executing this method.
+      - **GOOD**: A subclass overrides the method as follows: `BengalCat buyCat();`. The client gets a Bengal cat, which still is a cat, so everything okay.
+      - **BAD**: A subclass overrides the method as follows: `Animal butCat();`. Now the client code breaks since it receives an unknown generic animal, that doesn't for a structure designed for a cat.
+
+- A method in a subclass shouldn't throw types of exceptions which the base method isn't expected to throw:
+    - Types of exceptions should *match* or be *subtypes* of the ones that the base method is already able to throw. This is because `try-catch` blocks in the client code target specific types and unexpected types might slip throw the defensive lines of the client code and crash the application.
+
+- A subclass shouldn't strengthen pre-conditions:
+    - If the base method has a parameter with type `int`. If a subclass limits the value of the argument to just positive numbers (by throwing an exception), then the client code, which used to work fine when passing negative numbers into the method, now breaks if starts working with an object of this subclass.
+
+- A subclass shouldn't weaken post-conditions:
+    - You have a class with a method that works with a DB. A method of the class is supposed to always close all opened DB connections upon return a value.
+    - If you create a subclass that leaves open the connection to reuse it. But the client might now know about that and terminate the program without cleanly closing it, leaving behind ghost DB connections.
+
+#### Example
+Here is a hierarchy of document classes that violates the substitution principle:
+
+![Liskov_substitution_principle_bad](./Resources/SOLID/Liskov_substitution_principle_bad.jpeg)
+
+The `save` method in the `ReadOnlyDocument` subclass thrown an exception if someone tries to call it. The base method doesn't have this restriction. This means that the client code will break if we don't check the document type before saving it. 
+
+The resulting code also violates the open/closed principle, since the code becomes dependent on concrete classes of documents. If you introduce a new document subclass, you'll need to change the client code to support it.
+
+![Liskov_substitution_principle_good](./Resources/SOLID/Liskov_substitution_principle_good.jpeg)
+
+You can solve the problem by redesigning the class hierarchy. A subclass should extend the behavior of a superclass, therefore the read-only document becomes the base class of the hierarchy. The writable document is now a subclass which extends the base class and adds the saving behavior.
+
+### Interface segregation principle
+> Clients shouldn't be forced to depend on methods they do not use.
+
+Try to make your interfaces narrow enough that client  classes don't have to implement behaviors they don't need.
+
+You should break down "fat" interfaces into more granular and specific ones. Clients should only implement methods that they really need. Class inheritance lets a class have just one superclass, but it doesn't limit the number of interfaces that the class can implement, so there is no need to add lots of unrelated methods to a single interface (break them down into more refined interfaces, you can implement them all in a single class if needed).
+
+#### Example
+You create a library that makes it easy to integrate apps with various cloud computing providers. While the initial version only supported AWS, it covered the full set of cloud services and features.
+
+You assumed all cloud providers have the same spectrum of features as AWS, but it turned out that most of the interfaces of the library are too wide. Some methods describe features that other cloud providers just don't have:
+
+![Interface_segregation_principle_bad](./Resources/SOLID/Interface_segregation_principle_bad.jpeg)
+
+You can implement these methods and put nullify some methods, but its not elegant. The better approach is to break down the interface into parts. Classes that are able to implement the original interface can just implement several refined interfaces. Other classes can implement only those interfaces wich have methods that make sense for them:
+
+![Interface_segregation_principle_good](./Resources/SOLID/Interface_segregation_principle_good.jpeg)
+
+Remember (as with the other principles) don't go too far. More interfaces mean more complex code, keep a balance.
+
+### Dependency Inversion Principle
+> High-level classes shouldn't depend on low-level classes. Both should depend on abstraction. Abstraction shouldn't depend on details. Details should depend on abstraction.
+
+When designing software, you can make a distinction between two levels of classes:
+- **Low-level classes**: implement basic operations such as working with a disk, transferring data over a network, connection to a DB, etc.
+- **High-level classes**: Contain complex business logic that directs low-level classes to do something.
+
+Sometimes you design low-level classes first and then start on the high-level ones. This is common when you start to develop a prototype and you're not sure what's possible at the higher level because low-level stuff isn't yet implemented or clear. With this approach, business logic classes tend to become dependent on primitive low-level classes.
+
+This principle suggest changing the direction of this dependency:
+1. Describe the **interface** for low-level operations that high-level classes rely on, preferably in business terms. 
+    - Example: The business logic should call a method `openReport(file)` rather than a series of methods `openFile(x)`, `readBytes(n)`, `closeFile(x)`. These interfaces count as high-level ones.
+2. Make the high-level classes dependent on those interfaces, instead of on concrete low-level classes.
+3. Once low-level classes implement these interfaces, they become dependent on the business logic level, reserving the direction of the original dependency.
+
+This principle often goes along with the *open/closed*: you can extend low-level classes to use with different business logic classes without breaking existing classes.
+
+#### Example
+The high-level budget reporting class uses a low-level DB class for reading and persisting its data. Any change in the low-level class, such as when a new version of the DB gets released, may affect the high-level class, which isn't supposed to care about the data storage details.
+
+![Dependency_inversion_principle_bad](./Resources/SOLID/Dependency_inversion_principle_bad.jpeg)
+
+You can fix this problem by creating a high-level interface that describes read/write operations and making the reporting class use that interface instead of the low-level class. Then you can change or extend the original low-level class to implement the new read/write interface declared by the business logic:
+
+![Dependency_inversion_principle_good](./Resources/SOLID/Dependency_inversion_principle_good.jpeg)
+
+The direction of the original dependency has been inverted: low-level classes are now depended on the high-level abstraction.
