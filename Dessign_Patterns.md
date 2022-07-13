@@ -699,6 +699,8 @@ They provide various object creation mechanism which increase flexibility and re
 - **[Singleton](#singleton)**: Lets you ensure that a class has only one instance, while providing a global access point to the instance.
 
 ## Structural design patterns
+Structural design patterns explain how to assemble objects
+and classes into larger structures, while keeping these structures flexible and efficient.
 
 - **[Adapter](https://refactoring.guru/design-patterns/adapter/cpp/example)** Allows objects with incompatible interfaces to collaborate.
 
