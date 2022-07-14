@@ -1,3 +1,6 @@
+**Acknowledgement**: Most of this is bassed on the work of the [Refactoring Guru Team](https://refactoring.guru/).
+___
+
 # Table of contents
 
 - [Table of contents](#table-of-contents)
@@ -20,7 +23,7 @@
   - [Summary](#summary)
 - [Software design principles](#software-design-principles)
   - [Code reuse](#code-reuse)
-- [Design patterns](#design-patterns)
+- [Design patterns](#design-patterns-1)
   - [What's a Design Pattern?](#whats-a-design-pattern)
   - [What does the patter consist of?](#what-does-the-patter-consist-of)
   - [Classification of patterns](#classification-of-patterns)
@@ -31,19 +34,19 @@
   - [Program to an interface, not an implementation](#program-to-an-interface-not-an-implementation)
     - [Example](#example)
   - [Composition over inheritance](#composition-over-inheritance)
-    - [Example](#example)
+    - [Example](#example-1)
   - [SOLID principle](#solid-principle)
     - [Single responsibility principle](#single-responsibility-principle)
-      - [Example](#example)
+      - [Example](#example-2)
     - [Open / Closed principle](#open--closed-principle)
-      - [Example](#example)
+      - [Example](#example-3)
     - [Liskow substitution principle](#liskow-substitution-principle)
       - [Checklist](#checklist)
-      - [Example](#example)
+      - [Example](#example-4)
     - [Interface segregation principle](#interface-segregation-principle)
-      - [Example](#example)
+      - [Example](#example-5)
     - [Dependency Inversion Principle](#dependency-inversion-principle)
-      - [Example](#example)
+      - [Example](#example-6)
 - [Catalog of design patterns](#catalog-of-design-patterns)
   - [Creational Design patterns](#creational-design-patterns)
   - [Structural design patterns](#structural-design-patterns)
@@ -742,3 +745,6 @@ they're observing.
 algorithm without changing its structure.
 
 - **[Visitor](https://refactoring.guru/design-patterns/visitor/cpp/example)**: Lets you separate algorithms from the objects on which they operate.
+
+___
+**Acknowledgement**: Most of this is bassed on the work of the [Refactoring Guru Team](https://refactoring.guru/).
