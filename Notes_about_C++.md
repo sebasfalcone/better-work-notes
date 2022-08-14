@@ -1,6 +1,13 @@
 # Table of contents
 
 - [Notes about C++](#notes-about-c)
+  - [The standard C++ library](#the-standard-c-library)
+    - [Strings](#strings)
+      - [What's in a string?](#whats-in-a-string)
+        - [Creating and initializing](#creating-and-initializing)
+        - [Initialization limitations](#initialization-limitations)
+      - [Operating on strings](#operating-on-strings)
+      - [Replacing string characters](#replacing-string-characters)
   - [Static](#static)
     - [Static Variables](#static-variables)
       - [Initialization of Static Variables](#initialization-of-static-variables)
@@ -13,11 +20,403 @@
         - [Solving The Static Initialization Order Fiasco](#solving-the-static-initialization-order-fiasco)
     - [Summary](#summary)
     - [Static methods](#static-methods)
+  - [Strings](#strings)
   - [Return Value Optimization](#return-value-optimization)
-  - [Classes](#classes)
-  - [Smart pointers](#smart-pointers)
+- [Test Driven Development (TDD)](#test-driven-development-tdd)
+  - [The Soundex Class](#the-soundex-class)
+    - [Getting started](#getting-started)
 
 # Notes about C++
+
+## The standard C++ library
+The standard C++ library incorporates all the Standard C libraries, with additions and changes to support type safety and also adds libraries.
+
+### Strings
+The C++ **string** class solves the problem of array manipulation, keeping track of memory even during assignments and copy-constructions.
+
+#### What's in a string?
+
+In C, a string is an array of character that always includes a binary zero (*null terminator*) as its final array element. The main differences between C++ **strings** and their C counterparts are:
+- **String** objects associate the array of characters which constitute the **string** with methods useful for managing and operating on it.
+- **String** objects know the data starting location in memory, its content, length in characters and length in characters before the internal data buffer needs a resize.
+- **String** objects do not include a *null terminator*. 
+This reduces the like-hood of the three most common and destructive C programming errors: 
+- Overwriting array bounds.
+- Trying to access arrays throughout uninitialized or incorrectly valued pointers.
+- Leaving pointers "dangling" after an array ceases to occupy the storage that was once allocated to it.
+
+##### Creating and initializing
+The **string** class lets you:
+- Create an empty **string** and defer initializing it with character data.
+- Initialize a **string** by passing a literal, quoted character array as an argument to the constructor.
+- Initialize a **string** using '='.
+- Use one **string** to initialize another.
+```
+#include <string>
+int main() 
+{
+ std::string imBlank;
+ std::string heyMom("Where are my socks?");
+ std::string standardReply = "Beamed into deep " "space on wide angle dispersion?";
+ std::string useThisOneAgain(standardReply);
+}
+```
+These are the simplest forms of string initialization, but there are other variations which offer more flexibility and control. You can:
+- Use a portion of either a C **char** array or a C++ **string** .
+- Combine different sources of initialization data using **operator+**.
+- Use the **string** object's **substr()** member function to create a substring.
+```
+#include <string>
+#include <iostream>
+int main() 
+{
+  std::string s1("What is the sound of one clam napping?");
+  std::string s2("Anything worth doing is worth overdoing.");
+  std::string s3("I saw Elvis in a UFO.");
+
+  // Copy the first 8 chars
+  std::string s4(s1, 0, 8);
+
+  // Copy 6 chars from the middle of the source
+  std::string s5(s2, 15, 6);
+
+  // Copy from middle to end
+  std::string s6(s3, 6, 15);
+
+  // Copy all sorts of stuff
+  std::string quoteMe = s4 + "that" +
+ 
+  // substr() copies 10 chars at element 20
+  s1.substr(20, 10) + s5 +
+  
+  // substr() copies up to either 100 char or 'end of string' starting at element 5
+  "with" + s3.substr(5, 100) +
+  
+  // OK to copy a single char this way
+  s1.substr(37, 1);
+  
+  std::cout << quoteMe << std::endl;
+}
+```
+- The **string** member function **substr()** takes a starting position as its first argument and the number of characters to select as the second argument. Both of these arguments have default values and if you say **substr()** with an empty argument list you produce a copy of the entire **string**, so this is a convenient way to duplicate a **string**.
+
+> Output: "What is that one clam doing with Elvis in a UFO.?" 
+
+Notice the final line of example above. C++ allows **string** initialization techniques to be mixed in a single statement, a flexible and convenient feature. Also note that the last initializer copies just one character from the source **string**. 
+
+Another slightly more subtle initialization technique involves the use of the **string** iterators **string.begin()** and **string.end()**. This treats a string like a container object which has iterators indicating the start and end of the “container.” This way you can hand a **string** constructor two iterators and it will copy from one to the other into the new **string**: 
+```
+#include <string>
+#include <iostream>
+int main() 
+{
+ std::string source("xxx");
+ std::string s(source.begin(), source.end());
+ std::cout << s << std::endl;
+}
+```
+The iterators are not restricted to **begin()** and **end()**, so you can choose a subset of characters from the source string. 
+
+##### Initialization limitations
+**strings** may not be initialized with a single character or with ASCCI or other integer value:
+```
+#include <string>
+int main() 
+{
+ // Error: no single char inits
+ std::string nothingDoing1('a');
+ // Error: no integer inits
+ std::string nothingDoing2(0x37);
+}
+```
+This is true both for initialization by assignment and by copy constructor. 
+
+#### Operating on strings
+Strings grow as needed, without intervention on the part of the programmer. This makes string handling inherently more trustworthy. For example, the **string** function member functions **append()** and **insert()** transparently reallocate storage when the string grows:
+```
+#include <string>
+#include <iostream>
+int main() 
+{
+ std::string bigNews("I saw Elvis in a UFO. ");
+ std::cout << bigNews << std::endl;
+ 
+ // How much data have we actually got?
+ std::cout << "Size = " << bigNews.size() << std::endl;
+ 
+ // How much can we store without reallocating
+ std::cout << "Capacity = " << bigNews.capacity() << std::endl;
+
+ // Insert this string in bigNews immediately
+ // before bigNews[1]
+ bigNews.insert(1, " thought I ");
+ 
+ std::cout << bigNews << std::endl; 
+
+ std::cout << "Size = " << bigNews.size() << std::endl;
+ std::cout << "Capacity = " << bigNews.capacity() << std::endl;
+ 
+ // Make sure that there will be this much space
+ bigNews.reserve(500);
+ 
+ // Add this to the end of the string
+ bigNews.append("I've been working too hard.");
+ std::cout << bigNews << std::endl;
+ std::cout << "Size = " << bigNews.size() << std::endl;
+ std::cout << "Capacity = " << bigNews.capacity() << std::endl;
+}
+```
+> Output: \
+I saw Elvis in a UFO. \
+Size = 22 \
+Capacity = 22 \
+I thought I  saw Elvis in a UFO. \
+Size = 33 \
+Capacity = 44 \
+I thought I  saw Elvis in a UFO. I've been working too hard. \
+Size = 60 \
+Capacity = 500 
+
+The **size()**, **resize()**, **capacity()** and **reserve()** member functions can be very useful when its necessary to work back and forth between data contained in C++ style strings and traditional null terminated **char** arrays.
+
+#### Replacing string characters
+**insert()** is nice because it makes sure the insertion of character in a string won't overrun the storage capacity. 
+
+**replace()** is useful if you need to replace a part of a string or make it smaller while retaining the same set of characters. It has a number of overloads but the simplest takes three arguments: an integer (where to start the replace), an integer (how many character to eliminate) and the replacement string (can be a different number of characters than the eliminated quantity).
+
+```
+#include <string>
+#include <iostream>
+int main() 
+{
+ std::string s("A piece of text");
+ std::string tag("$tag$");
+ s.insert(8, tag + ' ');
+ std::cout << s << std::endl;
+ 
+ int start = s.find(tag);
+ std::cout << "start = " << start << std::endl;
+ std::cout << "size = " << tag.size() << std::endl;
+ 
+ s.replace(start, tag.size(), "hello there");
+ std::cout << s << std::endl;
+} 
+```
+The previous example replaces with a **char\***, but there's an overloaded version that replaces with a **string**.
+
+You should check to see if you've found anything before you perform a **replace()**. Here is a more complete demonstration:
+
+```
+#include <string>
+#include <iostream> 
+void replaceChars(string& modifyMe,string findMe, string newChars)
+{
+ // Look in modifyMe for the "find string"
+ // starting at position 0
+ int i = modifyMe.find(findMe, 0);
+ 
+ // Did we find the string to replace?
+ if(i != string::npos)
+    modifyMe.replace(i,newChars.size(),newChars); // Replace the find string with newChars
+}
+
+int main() 
+{
+ string bigNews = 
+ "I thought I saw Elvis in a UFO. " 
+ "I have been working too hard.";
+ 
+ std::string replacement("wig");
+ std::string findMe("UFO");
+ 
+ // Find "UFO" in bigNews and overwrite it:
+ replaceChars(bigNews, findMe, replacement);
+ std::cout << bigNews << std::endl;
+}
+```
+> Output: I thought I saw Elvis in a wig. I have been working too hard. 
+
+If replace doesn't find the search string, it returns **npos**. **npos** is a static constant member of
+the **basic_string** class. 
+
+Unlike **insert()**, **replace()** won't grow the **string**'s storage space if you copy new character into the middle of an existing series of array elemnts. But it will grow the storage space if you make a "replacement" that writes beyond the end of an existing array;
+
+```
+#include <string>
+#include <iostream>
+int main() 
+{
+ std::string bigNews("I saw Elvis in a UFO. " "I have been working too hard.");
+ std::string replacement("wig");
+ 
+ // The first arg says "replace chars beyond the end of the existing string":
+ bigNews.replace(bigNews.size(), replacement.size(), replacement);
+ 
+ std::cout << bigNews << std::endl;
+}
+```
+> Output: I saw Elvis in a UFO. I have been working too hard.wig 
+Notice that **replace()** expands the array to accommodate the growth of the string due to “replacement” beyond the bounds of the existing array.
+
+
+
+#### Simple character replacement using the STL replace() algorithm
+The **string** class doesn't define a way to replace all the instances of a character with another. 
+
+
+STL algorithms came in handy here, because an **string** class can look just like an STL container (STL algorithms work with anything that looks like an STL container). All the STL algorithms work on a "range" of elements within a container. Usually that range is just "from the beginning of the container to the end". 
+
+
+A **string** object looks like a container of characters (from **string::begin()** to **string::end()**). The following example shows the use of STL **replace()** algorithm to replace all instances of 'X with 'Y'.
+
+```
+#include <string>
+#include <algorithm>
+#include <iostream>
+
+int main() 
+{
+ std::string s("aaaXaaaXXaaXXXaXXXXaaa");
+ std::cout << s << std::endl;
+ replace(s.begin(), s.end(), 'X', 'Y');
+ std::cout << s << std::endl;
+} 
+```
+> output:
+aaaXaaaXXaaXXXaXXXXaaa
+aaaYaaaYYaaYYYaYYYYaaa
+
+Notice that this **replace()** is not called as member function of **string**. Unlike **string::replace()** functions with only performs one replacement, STL replace is replacing all instances of one character with another.
+
+Unlike **insert()**, **replace()** won't grow the **string**'s storage space if you copy new character into the middle of an existing array of elements. But, it will grow the storage space if you make a "replacement" that writes beyond the end of an existing array.
+
+The STL **replace()** algorithm only works with single objects (in this case, **char** objects), and will not perform replacements of quoted **char** arrays or of **string** objects. 
+
+Since a **string** looks like an STL container, there are a number of other STL algorithms that can be applied to it, which may solve other problems you have that are not directly addressed by the **string** member functions (More on STL latter).
+
+#### Concatenation using non-member overloaded operators
+C++ strings can be combined and appended using the **operator+** and **operator+=**:
+```
+#include <string>
+#include <iostream>
+
+int main() 
+{
+ std::string s1("This ");
+ std::string s2("That ");
+ std::string s3("The other ");
+ 
+ // operator+ concatenates strings
+ s1 = s1 + s2;
+ std::cout << s1 << std::endl;
+
+ // Another way to concatenates strings
+ s1 += s3;
+ std::cout << s1 << std::endl;
+ 
+ // You can index the string on the right
+ s1 += s3 + s3[4] + "oh lala";
+ std::cout << s1 << std::endl;
+}
+```
+
+> output:
+This
+This That
+This That The other
+This That The other ooh lala 
+
+### Searching in strings 
+The **find** family of **string** member functions allows you to locate a character or group of characters within a given string. Here are the members of the **find** family and their general usage: 
+
+
+| string find member function  |                                                                                                      What/how it finds                                                                                                       |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| find()                       | Searches a string for a specified character or group of characters and returns the starting position of the first occurrence found or npos if no match is found. (npos is a const of –1 and indicates that a search failed.) |
+| find_first_of()              | Searches a target string and returns the position of the first match of any character in a specified group. If no match is found, it returns npos.                                                                           |
+| find_last_of()               | Searches a target string and returns the position of the last match of any character in a specified group. If no match is found, it returns npos.                                                                            |
+| find_first_not_of()          | Searches a target string and returns the position of the first element that doesn’t match any character in a specified group. If no such element is found, it returns npos.                                                  |
+| find_last_not_of()           | Searches a target string and returns the position of the element with the largest subscript that doesn’t match of any character in a specified group. If no such element is found, it returns npos.                          |
+| rfind()                      | Searches a string from end to beginning for a specified character or group of characters and returns the starting position of the match if one is found. If no match is found, it returns npos                               |
+
+# Iostream
+
+Why use it?
+One argument can be that is safer than its C counterpart. For example, you want to make sure a stdio file is always safely opened and properly closed, without relying on the user to remember to call **close()** function:
+
+```
+// FileClass.h
+
+#ifndef FILECLAS_H
+#define FILECLAS_H
+#include <cstdio>
+
+class FileClass 
+{
+  private:
+    std::FILE* f;
+
+  public:
+    FileClass(const char* fname, const char* mode="r");
+    ~FileClass();
+    std::FILE* fp();
+};
+#endif // FILECLASS_H 
+``` 
+
+In C when you perform file I/O, you work with a naked pointer to a FILE struct, but this class wraps around the pointer and guarantees it is properly initialized and cleaned up using the constructor and destructor. The second constructor argument is the file mode, which defaults to “r” for “read.”
+
+To fetch the value of the pointer to use in the file I/O functions, you use the **fp()** access function. Here are the member function definitions:
+```
+// FileClass.cpp
+
+#include "FileClass.h"
+#include <cstdlib>
+
+FileClass::FileClass(const char* fname, const char* mode)
+{
+  f = fopen(fname, mode);
+  if(f == NULL) 
+  {
+    printf("%s: file not found\n", fname);
+    exit(1);
+  }
+}
+FileClass::~FileClass() { fclose(f); }
+FILE* FileClass::fp() { return f; }
+```
+
+The constructor calls **fopen()**,as you would normally do, but it also checks for failure upon opening the file. If there's a failure, the name
+of the file is printed and **exit()** is called. The destructor closes the file, and the access function **fp()** returns f.
+
+```
+int main(int argc, char* argv[]) 
+{
+  FileClass f(argv[1]); // Opens and tests
+  const int bsize = 100;
+  char buf[bsize];
+  
+  while(fgets(buf, bsize, f.fp())) 
+    puts(buf);
+    
+  // File automatically closed by destructor     
+} 
+```
+You create the FileClass object and use it in normal C file I/O function calls by calling **fp()**. When you're done with it, just forget about it, and the file is closed by the destructor at the end of the scope. 
+
+file:///home/sebas/Documents/Mega/Estudio/Bibliografia/Bibliografia%20General/Programming/C++/Thinking%20in%20C++.pdf
+68
+
+## True wrapping
+Even though the FILE pointer is private, it isn't particularly safe because **fp()** retrieves it. The only effect seems to be guaranteed initialization and cleanup, so why not make it public, or use a **struct** instead? Notice that while you can get a copy of **f** using **fp()**, you cannot assign
+to **f** – that's completely under the control of the class. Of course, after capturing the pointer returned by **fp()**, the client programmer can still assign to the structure elements, so the safety is in guaranteeing a valid FILE pointer rather than proper contents of the structure.
+
+If you want complete safety, you have to prevent the user from direct access to the FILE pointer. This means some version of all the normal file I/O functions will have to show up as class members, so everything you can do with the C approach is available in the C++ class.
+
+## Iostreams to the rescue
+
+
+
 
 ## Static
 The meanings changes depending on context and we have three scenarios:
@@ -227,17 +626,17 @@ class User
     public:
         User()
         {
-            std::cout << "\nNew user added - " << "User ammount " << ++users_ammout;
+            std::cout << "\nNew user added - " << "User amount " << ++users_ammout;
         }
           
         ~User()
         {
-            std::cout << "\nUser deleted   - " << "User ammount " << --users_ammout;
+            std::cout << "\nUser deleted   - " << "User amount " << --users_ammout;
         }
         
         static void count_users()
         {
-           std::cout << "\nUser ammount " << users_ammout;
+           std::cout << "\nUser amount " << users_ammout;
         }
 };
 int User::users_ammout = 0;
@@ -251,8 +650,31 @@ int main()
 }
 ```
 
+## Strings
+
 ## Return Value Optimization
 
-## Classes
 
-## Smart pointers
+# Test Driven Development (TDD)
+Write a test, get it to pass, clean up the design. This are the steps that embody TDD.
+
+To better understand TDD we will go throw examples.
+
+## The Soundex Class
+Searching is common in many applications. An effective search should find matches even if the user misspells words. For example, my name is Sebastian, but if someone refers to me as Sebas, Sevas, Sebis, Sebus I'd prefer they find me regardless.
+
+We will test-drive a Soundex class that can improve search capability by matching similar sounding words to the same encoding. The long-standing Soundex algorithm encodes words into a letter plus three digits, mapping similarly sounding words to the same encoding. Here are the rules for Soundex:
+1. Retain the first letter. Drop all other occurrences of a, e, i, o, u, y, h, w.
+2. Replace consonants with digits (after the first letter):
+    - b, f, p, v: 1
+    - c, g, j, k, q, s, x, z: 2
+    - d, t : 3
+    - l: 4
+    - m, n: 5
+    - r: 6
+3. If two adjacent letters encode to the same number, encode them instead as a single number. Also, do so if two letters with the same number are separated by h or w but code them twice if separated by a vowel). This rule also applies to the first letter.
+4. Stop when you have a letter and three digits (Zero-pad if needed).
+
+### Getting started
+Is a common misconception of TDD that you first define all the test and then you build the implementation. The reality is that you focus on one test at a time and incrementally consider the next behavior to drive into the system from there.
+
