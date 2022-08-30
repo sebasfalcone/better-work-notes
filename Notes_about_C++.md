@@ -650,9 +650,125 @@ int main()
 }
 ```
 
-## Strings
+# Casting
 
-## Return Value Optimization
+## Dynamic casting
+
+
+# Exception handling
+An exception is a problem that arises at runtime.
+
+Exceptions provide a way to transfer control from one part of a program to another. C++ exception handling is built upon three keywords:
+- **throw**: 
+  - Throws an exception in any code block. 
+  - The operand could be any type of expression.
+- **try**:
+  - Encloses a protected block of code.
+- **catch**:
+  - Follows a **try** block.
+  - You can specify what type of exception you want to catch.
+  - You could have different catch statements for different exception types.
+
+```
+#include <iostream>
+
+void fun(auto val)
+{
+    throw val;
+}
+
+int main()
+{
+    try {
+        fun(1.2);
+    }
+    catch (const char* err) { // Could catch fundamental types
+        std::cout << "const char * " << err;
+    }
+    catch (std::string err) { // Could catch class types
+        std::cout << "std::string " << err;
+    }
+    catch (int) { // No need to grab the throw value
+        std::cout << "int";
+    }
+    catch (...) { // Catch any exception
+        std::cout << "unknown type";
+    }
+
+    return 0;
+}
+```
+
+
+# Optimizations
+
+## ++prefix forms are preferred against postfix++
+This is due to the overhead presented on the former:
+```
+T& T::operator++()                T& T::operator--()      // the prefix form:
+{                                 { 
+  // perform increment              // perform decrement  // - do the work
+  return *this;                     return *this;         // - always return *this;
+}                                 }
+
+T T::operator++(int)              T T::operator--(int)    // the postfix form: 
+{                                 { 
+  T old( *this );                   T old( *this );       // - remember old value
+  ++*this;                          --*this;              // - call the prefix version
+  return old;                       return old;           // - return the old value
+}                                 } 
+```
+
+## Return Value Optimization (RVO)
+This happens when two conditions are meet: 
+- Caller allocates space on stack for return value, passes the address to callee.
+- Callee construct the result **directly** in that space.
+
+> NOTE: at the assembly level, the compiler always passes at least one parameter, this is the return address.
+
+RVO can still apply even when the function has several return statements, as long as the returned objects are created on the return statements, therefore this object does not have a name:
+```
+T f()
+{
+  if (...)
+  {
+    return T(...);
+  }
+  else
+  {
+    return T(...);
+  }
+}
+```
+
+## Name Return Value Optimization (NRVO)
+It can remove the intermediary objects even if the returned object has a name and is therefore not constructed on the return statement. So this object can be constructed before the return statement, like in the following example:
+```
+T f()
+{
+  T result(...);
+  ...
+  return result;
+}
+```
+But, like with the RVO, the function still needs to return a unique object (which is the case on the above example), so that the compiler can determine which object inside of 'f' it has to construct at the memory location of t (outside of f).
+
+For example, the NRVO can still be applied in the following case, because only one object (result) can be returned from the function.
+```
+T f()
+{
+  T result(...);
+  if (...)
+  {
+    return result;
+  }
+  ...
+  return result;
+}
+```
+
+
+> FINAL NOTE: you can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
 
 # Test Driven Development (TDD)
