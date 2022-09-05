@@ -8,6 +8,12 @@
         - [Initialization limitations](#initialization-limitations)
       - [Operating on strings](#operating-on-strings)
       - [Replacing string characters](#replacing-string-characters)
+      - [Simple character replacement using the STL replace() algorithm](#simple-character-replacement-using-the-stl-replace-algorithm)
+      - [Concatenation using non-member overloaded operators](#concatenation-using-non-member-overloaded-operators)
+    - [Searching in strings](#searching-in-strings)
+- [Iostream](#iostream)
+  - [True wrapping](#true-wrapping)
+  - [Iostreams to the rescue](#iostreams-to-the-rescue)
   - [Static](#static)
     - [Static Variables](#static-variables)
       - [Initialization of Static Variables](#initialization-of-static-variables)
@@ -20,13 +26,71 @@
         - [Solving The Static Initialization Order Fiasco](#solving-the-static-initialization-order-fiasco)
     - [Summary](#summary)
     - [Static methods](#static-methods)
-  - [Strings](#strings)
-  - [Return Value Optimization](#return-value-optimization)
+- [Casting](#casting)
+  - [Dynamic casting](#dynamic-casting)
+- [Exception handling](#exception-handling)
+- [Optimizations](#optimizations)
+  - [++prefix forms are preferred against postfix++](#prefix-forms-are-preferred-against-postfix)
+  - [Return Value Optimization (RVO)](#return-value-optimization-rvo)
+  - [Name Return Value Optimization (NRVO)](#name-return-value-optimization-nrvo)
 - [Test Driven Development (TDD)](#test-driven-development-tdd)
   - [The Soundex Class](#the-soundex-class)
     - [Getting started](#getting-started)
 
 # Notes about C++
+
+## The stack and the heap
+C++ has several types of memories that correspond to different parts of the physical memory:
+- The static
+- The stack
+- The heap
+
+### The stack
+The default way to store objects in C++:
+```
+int f(int a)
+{
+    if (0 < a)
+    {
+        std::string s = "a positive number";
+        std::cout << s << '\n';
+    }
+    return a;
+}
+```
+Here **a** and **s** are stored (pushed) on the stack, also they are next to one another in memory, hence the name stack. The most important part is that **objects allocated on the stack are automatically destroyed when they go out of scope**.
+
+The scope is defined by a pair of **{}**, except those used to initialize objects: 
+```
+std::vector<int> v = {1, 2, 3}; // this is not a scope
+
+if (0 < v.size())
+{ // this is the beginning of a scope
+    ...
+} // this is the end of a scope
+```
+There are three ways for an objects to go out of scope:
+- Encountering the next closing bracket **}**.
+- Encountering a return statement.
+- Having an exception thrown inside the current scope that is not caught inside the current scope.
+
+### The heap
+The heap is where dynamically allocated objects are stored, that is to say **objects that are allocated with a call to new**, which returns a pointer. In reality the heap is the memory allocated by **malloc**, **calloc** and **realloc**, and new stores it in the **free store** (but the term is used anyways).
+
+Objects stored on the heap are **not destroyed automatically** but when **delete** is called. This offers the advantage of keeping them longer than then end of a scope, and without incurring any copy except those of pointers (which are cheap). 
+
+> NOTE: Pointers allow to manipulate objects polymorphically. A pointer to a base class can point to objects of any derived class.
+
+The price for this flexibility is that the developer is in charge of the deletion on this objects also called deallocation. Deleting an object on the heap is not trivial, because delete has to be called **once and only once**, doing so leads to *undefined behavior*. If the memory is not deallocated, then this memory space is not reusable, this is called a *memory leak*.
+
+As you can see, this is a problem. Latter we will see the concept of [smart pointers](#smart-pointers) which will help us on this task.
+
+## Function pointers
+A way to assign a function to a variable.
+
+## Lambdas
+Whenever you have a function pointer, you can instead use a lambda, but without defining a function.
+
 
 ## The standard C++ library
 The standard C++ library incorporates all the Standard C libraries, with additions and changes to support type safety and also adds libraries.
@@ -414,7 +478,7 @@ to **f** – that's completely under the control of the class. Of course, after 
 If you want complete safety, you have to prevent the user from direct access to the FILE pointer. This means some version of all the normal file I/O functions will have to show up as class members, so everything you can do with the C approach is available in the C++ class.
 
 ## Iostreams to the rescue
-
+TODO
 
 
 
@@ -699,6 +763,147 @@ int main()
 }
 ```
 
+# Good practices
+
+## Pointers
+Pointers have many advantages:
+- Much smaller than objects.
+- Used on dynamic memory allocation.
+And disadvantages.
+- Double free.
+- Free on de-referenced pointer.
+- De-reference on invalid memory address (0x00000001 -> null check won't help).
+If we talk about raw pointers, we should avoid their use entirely and use some C++ idiomatic feature.
+
+### Passing objects 
+C++ introduce the concept of reference, which by design are *not null*, that allow to pass large objects with minimal cost. And returning objects by value benefits from the[RVO](#return-value-optimization-rvo), [NRVO](#name-return-value-optimization-nrvo) and from [move semantics](#move-semantics) to allow minimal cost in many cases. 
+
+### Smart pointers
+They essentially encapsulate all of the memory management, including the need to call delete at all.
+
+#### RAII (Resource acquisition is initialization)
+Is a very idiomatic concept in C++, takes advantage of the property of the stack to simplify the memory management of objects on the heap. 
+
+The principle is simple: wrap a resource (pointer for instance) into an object, and dispose of the resources in its destructor. This is what smart pointers do:
+```
+// This is just to grasp the concept of RAII. 
+// Is not the complete interface of a smart pointer.
+
+template <typename T>
+class SmartPointer
+{
+public:
+    explicit SmartPointer(T* p) : p_(p) {}
+    ~SmartPointer() { delete p_; }
+
+private:
+    T* p_;
+};
+```
+You can manipulate *smart pointers* as objects allocated on the stack, and the compiler takes care of automatically calling the destructor when out of scope.
+
+Syntactically, a *smart pointers* behaves like a raw pointer, it can be dereferenced with operators `*` or `->` and you can test for nullity. The underlying pointer itself is accessible with a **.get()**.
+
+One of the most important aspects is that the above interface doesn't deal with copy! A **SmartPointer** copied also copies the underlying pointer, so the following code has a bug:
+```
+{
+    SmartPointer<int> sp1(new int(42));
+    SmartPointer<int> sp2 = sp1; // now both sp1 and sp2 point to the same object
+} // sp1 and sp2 are both destroyed, the pointer is deleted twice!
+```
+How we deal with copy? Well, the various types of *smart pointers* differ in this. But this lets us express our intentions in code a lot better.
+
+The various types of pointers are there to **express a design** in the code. Here are the types of pointers sorted by decreasing order of usefulness (according to someone):
+- std::unique_ptr
+- raw pointer
+- std::shared_ptr
+- std::weak_ptr
+- boost::scoped_ptr
+- std::auto_ptr
+
+#### std::unique_ptr
+This pointer is the sole owner of a memory resource. It will hold a pointer and delete it in its destructor (unless you customize it).
+
+This allows you to express your intentions in an interface. Consider the following function:
+```
+std::unique_ptr<House> buildAHouse();
+```
+It gives you a pointer to a house, of which you are the owner. *No one else will delete this pointer*, except the unique_ptr returned from the function. 
+
+> NOTE: std::unique_ptr is the preferred pointer to return from a **factory** function.
+  
+
+Note though that even when you receive a unique_ptr, you're not guaranteed that no one else has access to this pointer. If another context keeps a copy of the pointer inside your unique_ptr, then modifying the pointed object through the unique_ptr object will impact this other context. If you don't want this to happen, you can express it in the following way:
+```
+std::unique_ptr<const House> buildAHouse(); // for some reason, I don't want you
+                                            // to modify the house you're being passed
+```
+To ensure only one unique_ptr own a memory resource, std::unique_ptr cannot be copied. But the ownership can be transferred by moving a unique_ptr into another one.
+```
+std::unique_ptr<int> p1 = std::make_unique(42);
+std::unique_ptr<int> p2 = move(p1); // now p2 hold the resource
+                                    // and p1 no longer hold anything
+```
+
+#### Raw pointers
+They share a lot with references, but the latter is preferred (except in some cases). The important thing to focus is that **raw pointers and references represent access to an object, but not ownership**. And this is the default way of passing objects to functions and methods.
+
+This is relevant when you hold an object with an unique_ptr and want to pass it to an interface. You don't pass the unique_ptr, nor a reference to it, but a reference to the pointed object.
+```
+std::unique_ptr<House> house = buildAHouse();
+renderHouse(*house);
+```
+
+#### std::shared_ptr
+A single memory resource can be held by several std::shared_ptr at the same time. Internally maintains a count of how many of them are holding the same resource and when the last one is destroyed, it deletes the memory resource. Therefore allows copies, but with a reference-counting mechanism. 
+
+They should not be used by the default, because having several simultaneous holders of a resource:
+- Makes for a more complex system.
+- Makes thread-safety harder.
+- Makes the code counter-intuitive when an object is not shared in therms of domain.
+- Can incur in performance costs, both memory and time.
+
+One good case for using it is when objects are **shared in the domain**. 
+
+![Shared_ptr](./Resources/Notes_about_C++/Shared_ptr.jpg)
+
+#### std::weak_ptr
+Can hold a reference to a shared object, but they don't increment the reference count. If no std::shared_ptr are holding an object, it will be deleted even if some weak pointers still point to it.
+
+For this reason, weak_ptr need to check if an object is still alive. For this it has to be copied into a shared_ptr:
+```
+void useMyWeakPointer(std::weak_ptr<int> wp)
+{
+    if (std::shared_ptr<int> sp = wp.lock())
+    {
+        // the resource is still here and can be used
+    }
+    else
+    {
+        // the resource is no longer here
+    }
+}
+```
+
+A typical use case for this is about breaking shared_ptr circular references. Consider the following code:
+```
+struct House
+{
+    std::shared_ptr<House> neighbour;
+};
+
+std::shared_ptr<House> house1 = std::make_shared<House>();
+std::shared_ptr<House> house2 = std::make_shared<House>();;
+house1->neighbour = house2;
+house2->neighbour = house1;
+```
+None of the houses ends up being destroyed at the end of this code, because the shared_ptrs points into one another. But if one is a weak_ptr instead, there is no longer a circular reference.
+
+#### boost::scoped_ptr
+It disables the copy and even the move construction. It is the sole owner of a resource, and its ownership cannot be transferred. Therefore, a scoped_ptr can only live inside a scope or as a data member of an object.
+
+#### std::auto_ptr
+Deprecated in C++11 and removed on C++17.
 
 # Optimizations
 
@@ -767,9 +972,11 @@ T f()
 }
 ```
 
-
 > FINAL NOTE: you can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
+## Move semantics
+https://www.fluentcpp.com/2018/02/06/understanding-lvalues-rvalues-and-their-references/
+___
 
 # Test Driven Development (TDD)
 Write a test, get it to pass, clean up the design. This are the steps that embody TDD.
