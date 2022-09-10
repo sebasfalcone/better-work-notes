@@ -1,6 +1,11 @@
 # Table of contents
 
 - [Notes about C++](#notes-about-c)
+  - [The stack and the heap](#the-stack-and-the-heap)
+    - [The stack](#the-stack)
+    - [The heap](#the-heap)
+  - [Function pointers](#function-pointers)
+  - [Lambdas](#lambdas)
   - [The standard C++ library](#the-standard-c-library)
     - [Strings](#strings)
       - [What's in a string?](#whats-in-a-string)
@@ -14,6 +19,8 @@
 - [Iostream](#iostream)
   - [True wrapping](#true-wrapping)
   - [Iostreams to the rescue](#iostreams-to-the-rescue)
+  - [Initialization](#initialization)
+      - [Conclusion](#conclusion)
   - [Static](#static)
     - [Static Variables](#static-variables)
       - [Initialization of Static Variables](#initialization-of-static-variables)
@@ -29,10 +36,22 @@
 - [Casting](#casting)
   - [Dynamic casting](#dynamic-casting)
 - [Exception handling](#exception-handling)
+- [Good practices](#good-practices)
+  - [Pointers](#pointers)
+    - [Passing objects](#passing-objects)
+    - [Smart pointers](#smart-pointers)
+      - [RAII (Resource acquisition is initialization)](#raii-resource-acquisition-is-initialization)
+      - [std::unique_ptr](#stdunique_ptr)
+      - [Raw pointers](#raw-pointers)
+      - [std::shared_ptr](#stdshared_ptr)
+      - [std::weak_ptr](#stdweak_ptr)
+      - [boost::scoped_ptr](#boostscoped_ptr)
+      - [std::auto_ptr](#stdauto_ptr)
 - [Optimizations](#optimizations)
   - [++prefix forms are preferred against postfix++](#prefix-forms-are-preferred-against-postfix)
   - [Return Value Optimization (RVO)](#return-value-optimization-rvo)
   - [Name Return Value Optimization (NRVO)](#name-return-value-optimization-nrvo)
+  - [Move semantics](#move-semantics)
 - [Test Driven Development (TDD)](#test-driven-development-tdd)
   - [The Soundex Class](#the-soundex-class)
     - [Getting started](#getting-started)
@@ -480,7 +499,39 @@ If you want complete safety, you have to prevent the user from direct access to 
 ## Iostreams to the rescue
 TODO
 
+## Initialization
+If an initializer is specified for an object, that initializer determines the initial value of an object. We can use one of the four syntactic styles:
+```
+X a1 {v};
+X a2 = {v};
+X a3 = v;
+X a4(v);
+```
+Of these, only the first one can be used in every context, and is less error-prone.
 
+```
+void fun(double val, int val2) 
+{
+
+    int x2 = val;    // if val == 7.9, x2 becomes 7 (bad)
+
+    char c2 = val2;  // if val2 == 1025, c2 becomes 1 (bad)
+
+    int x3 {val};    // error: possible truncation (good)
+
+    char c3 {val2};  // error: possible narrowing (good)
+
+    char c4 {24};    // OK: 24 can be represented exactly as a char (good)
+
+    char c5 {264};   // error (assuming 8-bit chars): 264 cannot be 
+                     // represented as a char (good)
+
+    int x4 {2.0};    // error: no double to int value conversion (good)
+}
+```
+
+#### Conclusion
+Prefer {} initialization over alternatives unless you have a strong reason not to.
 
 ## Static
 The meanings changes depending on context and we have three scenarios:
