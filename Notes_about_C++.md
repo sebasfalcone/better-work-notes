@@ -52,9 +52,6 @@
   - [Return Value Optimization (RVO)](#return-value-optimization-rvo)
   - [Name Return Value Optimization (NRVO)](#name-return-value-optimization-nrvo)
   - [Move semantics](#move-semantics)
-- [Test Driven Development (TDD)](#test-driven-development-tdd)
-  - [The Soundex Class](#the-soundex-class)
-    - [Getting started](#getting-started)
 
 # Notes about C++
 
@@ -110,6 +107,46 @@ A way to assign a function to a variable.
 ## Lambdas
 Whenever you have a function pointer, you can instead use a lambda, but without defining a function.
 
+## lvalues and rvalues
+https://www.fluentcpp.com/2018/02/06/understanding-lvalues-rvalues-and-their-references/
+In C++, every expression is either an lvalue or an rvalue:
+- An **lvalue** denotes an object whose resources cannot be reused. 
+  - This includes expressions that designate objects directly by their *names*, but not only.
+    - In `int y = f(x)`, x and y are objects names and are lvalues).
+    - In the expression `myVector[0]` is also an lvalue.
+- An **rvalue** denotes an object whose resources can be reused.
+  - This typically include *temporary objects* as they can't be manipulated at the place they are created and are soon to be destroyed.
+    - In the expression `g(MyClass())`, `MyClass()` designates a temporary object that `g` can modify without impacting the code surrounding the expression.
+
+- An **lvalue reference** is a reference that binds to an lvalue. They are marked with one ampersand.
+- An **rvalue reference** is a reference that binds to an rvalue. They are marked with two ampersands.
+
+> NOTE: There is one exception, it can be an lvalue const reference binding to an rvalue. 
+
+### What is this all for?
+rvalue references add the possibility to express a new intention in code: **disposable objects**. Passing objects as a reference means *you no longer care about it*.
+```
+void f(MyClass&& x)
+{
+  ...
+}
+```
+The message is "the object that `x` binds to is YOURS. Do whatever you like with it". It's a bit like giving a copy to f, but without the copy.
+
+This can be interesting for two purposes:
+- Improving performance (see move constructors).
+- Taking over ownership (since the object the reference binds to has been abandoned by the caller).
+
+No that this could not be achieved with lvalue references. For example:
+```
+void f(MyClass& x)
+{
+  ...
+}
+```
+You can modify the value of the object that x binds to, but since it is an lvalue reference, it means that somebody probably cares about it at call site.
+
+//TODO
 
 ## The standard C++ library
 The standard C++ library incorporates all the Standard C libraries, with additions and changes to support type safety and also adds libraries.
@@ -344,7 +381,7 @@ Notice that **replace()** expands the array to accommodate the growth of the str
 
 
 #### Simple character replacement using the STL replace() algorithm
-The **string** class doesn't define a way to replace all the instances of a character with another. 
+The **string** class doesn't define a way to replace all the Validacioninstances of a character with another. 
 
 
 STL algorithms came in handy here, because an **string** class can look just like an STL container (STL algorithms work with anything that looks like an STL container). All the STL algorithms work on a "range" of elements within a container. Usually that range is just "from the beginning of the container to the end". 
@@ -416,7 +453,7 @@ The **find** family of **string** member functions allows you to locate a charac
 | string find member function  |                                                                                                      What/how it finds                                                                                                       |
 |------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | find()                       | Searches a string for a specified character or group of characters and returns the starting position of the first occurrence found or npos if no match is found. (npos is a const of –1 and indicates that a search failed.) |
-| find_first_of()              | Searches a target string and returns the position of the first match of any character in a specified group. If no match is found, it returns npos.                                                                           |
+| find_first_of()              | Searches a target string and returns the position of the first match of any character in a specified group. If no match is found, it returns npos.                                                        Validacion                   |
 | find_last_of()               | Searches a target string and returns the position of the last match of any character in a specified group. If no match is found, it returns npos.                                                                            |
 | find_first_not_of()          | Searches a target string and returns the position of the first element that doesn’t match any character in a specified group. If no such element is found, it returns npos.                                                  |
 | find_last_not_of()           | Searches a target string and returns the position of the element with the largest subscript that doesn’t match of any character in a specified group. If no such element is found, it returns npos.                          |
@@ -814,6 +851,167 @@ int main()
 }
 ```
 
+## Re-throwing exceptions
+Occasionally you may run into a case where you want to catch an exception, but not want to (or have the ability to) fully handle it at the point where you catch it. This is common when you want to log an error, but pass the issue along to the caller to actually handle.
+
+### Throw a new exception
+```
+void fun()
+{
+  try
+  {
+    insideFun(); // throws int exception on failure
+  }
+  catch (int exception)
+  {
+    logError("error in fun");
+    
+    throw 'q'; // throw char exception 'q' up the stack to be handled by caller of fun()
+  }
+}
+```
+- The exception from the catch block can be an exception of any type. It doesn't need to be the same type as the one that was caught.
+
+### The wrong way
+```
+void fun()
+{
+  try
+  {
+    insideFun(); // throws int exception on failure
+  }
+  catch (int exception)
+  {
+    logError("error in fun");
+    
+    throw exception;
+  }
+}
+```
+Although this works, this method has a couple of downsides. 
+
+- This doesn't throw the exact same exception as the one that is caught, rather a copy-initialized copy (this could be less performant).
+
+- But the worst scenario arises here:
+```
+void fun()
+{
+  try
+  {
+    insideFun(); // throws int exception on failure
+  }
+  catch (Base& exception)
+  {
+    logError("error in fun");
+      
+    throw exception; // Danger: this throws a Base object, not a Derived object
+  }
+}
+```
+
+In this case, insideFun() throws a **Derived object**, but the catch block is getting a **Base reference**. When we re-throw the exception its doing so with a copy-initialized exception of type Base (not derived). Our Derived object has been sliced!.
+```
+#include <iostream>
+
+class Base
+{
+public:
+    Base() {}
+    virtual void print() { std::cout << "Base"; }
+};
+
+class Derived: public Base
+{
+public:
+    Derived() {}
+    void print() override { std::cout << "Derived"; }
+};
+
+int main()
+{
+    try
+    {
+        try
+        {
+            throw Derived{};
+        }
+        catch (Base& b)
+        {
+            std::cout << "Caught Base b, which is actually a ";
+            b.print();
+            std::cout << '\n';
+            throw b; // the Derived object gets sliced here
+        }
+    }
+    catch (Base& b)
+    {
+        std::cout << "Caught Base b, which is actually a ";
+        b.print();
+        std::cout << '\n';
+    }
+
+    return 0;
+}
+```
+```
+OUTPUT:
+Caught Base b, which is actually a Derived
+Caught Base b, which is actually a Base 
+```
+
+### The right way
+C++ provides a way to re-throw the same exception that was caught. An its actually really simple:
+```
+#include <iostream>
+
+class Base
+{
+public:
+    Base() {}
+    virtual void print() { std::cout << "Base"; }
+};
+
+class Derived: public Base
+{
+public:
+    Derived() {}
+    void print() override { std::cout << "Derived"; }
+};
+
+int main()
+{
+    try
+    {
+        try
+        {
+            throw Derived{};
+        }
+        catch (Base& b)
+        {
+            std::cout << "Caught Base b, which is actually a ";
+            b.print();
+            std::cout << '\n';
+            throw b; // the Derived object gets sliced here
+        }
+    }
+    catch (Base& b)
+    {
+        std::cout << "Caught Base b, which is actually a ";
+        b.print();
+        std::cout << '\n';
+    }
+
+    return 0;
+}
+```
+```
+OUTPUT:
+Caught Base b, which is actually a Derived
+Caught Base b, which is actually a Derived
+```
+
+And this has the advantage that no copies are made. So no performance killing copies or slicing.
+
 # Good practices
 
 ## Pointers
@@ -1026,29 +1224,4 @@ T f()
 > FINAL NOTE: you can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
 ## Move semantics
-https://www.fluentcpp.com/2018/02/06/understanding-lvalues-rvalues-and-their-references/
-___
-
-# Test Driven Development (TDD)
-Write a test, get it to pass, clean up the design. This are the steps that embody TDD.
-
-To better understand TDD we will go throw examples.
-
-## The Soundex Class
-Searching is common in many applications. An effective search should find matches even if the user misspells words. For example, my name is Sebastian, but if someone refers to me as Sebas, Sevas, Sebis, Sebus I'd prefer they find me regardless.
-
-We will test-drive a Soundex class that can improve search capability by matching similar sounding words to the same encoding. The long-standing Soundex algorithm encodes words into a letter plus three digits, mapping similarly sounding words to the same encoding. Here are the rules for Soundex:
-1. Retain the first letter. Drop all other occurrences of a, e, i, o, u, y, h, w.
-2. Replace consonants with digits (after the first letter):
-    - b, f, p, v: 1
-    - c, g, j, k, q, s, x, z: 2
-    - d, t : 3
-    - l: 4
-    - m, n: 5
-    - r: 6
-3. If two adjacent letters encode to the same number, encode them instead as a single number. Also, do so if two letters with the same number are separated by h or w but code them twice if separated by a vowel). This rule also applies to the first letter.
-4. Stop when you have a letter and three digits (Zero-pad if needed).
-
-### Getting started
-Is a common misconception of TDD that you first define all the test and then you build the implementation. The reality is that you focus on one test at a time and incrementally consider the next behavior to drive into the system from there.
 
