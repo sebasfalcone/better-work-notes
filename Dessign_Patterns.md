@@ -1,4 +1,4 @@
-**Acknowledgement**: Most of this is bassed on the work of the [Refactoring Guru Team](https://refactoring.guru/).
+**Acknowledgement**: Most of this is based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
 ___
 
 # Table of contents
@@ -79,18 +79,18 @@ ___
 - In a program we usually have more than one class. Some of these classes might be organized into **class hierarchies**.
 - Now imagine a **Dog class**, turns out that dogs and cats have a lot in common: name, sex, age, etc. Dogs can sleep, eat and run, same as cats. So we can define the base **Animal class** that would list all the common attributes and behaviors. 
 >
-- A parent class is called **superclass** and its children are **subclasses**. 
-- Subclasses inherit state and behavior from their parent, defining only attributes or behaviors that differ.
+- A parent class is called **super-class** and its children are **sub-classes**. 
+- Sub-classes inherit state and behavior from their parent, defining only attributes or behaviors that differ.
 >
 - In this example, the **cat class** would have the **meow method** and the **dog class** the **bark method**. 
 
 ![Hierarchy](./Resources/Hierarchy_cat_dog.jpg )
 
-- We can go one level deeper and create a more general class for all living organisms. Then it will become a superclass for **animals** and **plants**. This pyramid of classes is a **hierarchy**.
+- We can go one level deeper and create a more general class for all living organisms. Then it will become a super-class for **animals** and **plants**. This pyramid of classes is a **hierarchy**.
 
 ![Hierarchy](./Resources/Hierarchy_organism.jpg)
 
-- **Subclasses can override the behavior of methods** that they inherit from parent classes. 
+- **Sub-classes can override the behavior of methods** that they inherit from parent classes. 
 - A subclass can either completely replace the default behavior or just enhance it with some extra stuff.
 
 ## Pillars of OOP
@@ -107,7 +107,7 @@ ___
 - To start a car engine, you only need to turn a key or press a button. You've also have a steering wheel, a gear knob and some pedals. This illustrates how each object has an **interface** or in other words, a public part of an object open to interactions with other objects.
 - *Encapsulation* is the ability of and object to hide parts of its state and behaviors from other objects. 
 
-- *Encapsulate* something means to make it **private**, in other words accessible only from within the methods of its own class. There is a less restrictive mode called **protected** that makes a member of a class available to subclasses as well.
+- *Encapsulate* something means to make it **private**, in other words accessible only from within the methods of its own class. There is a less restrictive mode called **protected** that makes a member of a class available to sub-classes as well.
 
 - Interfaces and abstract classes / methods are based on concepts of abstraction and encapsulation.
 
@@ -154,31 +154,31 @@ class Rectangle: public Shape {
 ```
 
 - **Designing Strategy**
-	- An object-oriented system might use an abstract base class to provide a common and standardized interface appropriate for all the external applications. Then, through inheritance from that abstract base class, derived classes are formed that operate similarly.
+  - An object-oriented system might use an abstract base class to provide a common and standardized interface appropriate for all the external applications. Then, through inheritance from that abstract base class, derived classes are formed that operate similarly.
 
-	- Imagine you have a **FlyingTransport** interface with a method **fly(origin, destination, passengers). When designing an air transportation simulation, you could restrict the **Airport** class to work only with objects that implement the **FlyingTransport** interface. After this, you can be sure that any object passed to an airport object would be able to arrive or depart from this type of airport.
+  - Imagine you have a **FlyingTransport** interface with a method **fly(origin, destination, passengers). When designing an air transportation simulation, you could restrict the **Airport** class to work only with objects that implement the **FlyingTransport** interface. After this, you can be sure that any object passed to an airport object would be able to arrive or depart from this type of airport.
 
-	![Airport](./Resources/Airport.jpeg)
+  ![Airport](./Resources/Airport.jpeg)
 
-	- You could change the implementation of the **fly** method in these classes in any way you want (as long as the signature of the method remains the same as declared in the interface).
+  - You could change the implementation of the **fly** method in these classes in any way you want (as long as the signature of the method remains the same as declared in the interface).
 
 ### Inheritance
-- Is the ability to build new classes on top of existing ones. If you want to create a class that's slightly different from an existing one, you can extend the existing class and put extra functionality into a resulting subclass, which inherits fields and methods of the superclass (this avoids duplicating code).
+- Is the ability to build new classes on top of existing ones. If you want to create a class that's slightly different from an existing one, you can extend the existing class and put extra functionality into a resulting subclass, which inherits fields and methods of the super-class (this avoids duplicating code).
 
 - As a consequence you have the same interface as their parent class. 
-	- You can't hide a method in a subclass if it was declared in the superclass. 
-	- Also, you must implement all abstract methods, even if they don't make sense for tour subclass.
+  - You can't hide a method in a subclass if it was declared in the super-class. 
+  - Also, you must implement all abstract methods, even if they don't make sense for tour subclass.
 
 ![Inheritance](./Resources/Inheritance.jpeg)
 
 ### Polymorphism
-- Most **animals** can make sounds. We can anticipate that all subclasses will need to override the base **makeSound** method so each subclass can emit the correct sound.
-- So we can declare it *abstract*, this let us omit any default implementation of the method in the superclass, but force all subclasses to come up with their own.
+- Most **animals** can make sounds. We can anticipate that all sub-classes will need to override the base **makeSound** method so each subclass can emit the correct sound.
+- So we can declare it *abstract*, this let us omit any default implementation of the method in the super-class, but force all sub-classes to come up with their own.
 
 ![Polymorphism](./Resources/Polymorphism.jpeg)
 
 - Imagine the following scenario:
-	- You have a bag with several cats and dogs, and after taking one out you don't know for sure what it is. But when it makes a sound, the animal emits a specific sound depending on its concrete class.
+  - You have a bag with several cats and dogs, and after taking one out you don't know for sure what it is. But when it makes a sound, the animal emits a specific sound depending on its concrete class.
 ```
 // Base class
 class Animal 
@@ -237,8 +237,8 @@ In addition to *inheritance* and *implementation* there are other types of relat
 ![Dependency](./Resources/Dependency.jpeg)
 - There is a dependency between two classes if some changes to the definition of one class might result in modifications to another class. 
 - Typically occur when you use concrete class names in your code. For example:
-	- When you specify types in method signatures.
-	- When instantiating objects via constructor calls.
+  - When you specify types in method signatures.
+  - When instantiating objects via constructor calls.
 - You can make a dependency weaker if you make your code dependent on interfaces or abstract classes instead of concrete classes.
 
 ### Association
@@ -510,14 +510,14 @@ Inheritance is the most obvious and easy way of reusing code between classes. Yo
 
 Unfortunately, inheritance comes with caveats that become apparent when you program has tons of classes:
 
-- **A subclass can't reduce the interface of a supperclass**:
+- **A subclass can't reduce the interface of a supper-class**:
    - You have yo implement all abstract methods of the parent class, even if you won't use them.
 - **When overriding methods you need to make sure that the new behavior is compatible with the base one**:
-   - Objects of the subclass may be passed to any code that expects objects of the superclass and you don't want that code to break.
-- **Inheritance breaks encapsulation of the superclass**:
+   - Objects of the subclass may be passed to any code that expects objects of the super-class and you don't want that code to break.
+- **Inheritance breaks encapsulation of the super-class**:
    - Internal details of the parent class become available to the subclass.
-- **Subclasses are tightly coupled to superclasses**:
-   - Any change in a superclass may break the functionality of subclasses.
+- **Sub-classes are tightly coupled to super-classes**:
+   - Any change in a super-class may break the functionality of sub-classes.
 - **Trying to reuse code through inheritance can lead to creating parallel inheritance hierarchies**:
    - Inheritance usually takes place in a single dimension. But when there are two or more dimensions, you have to create lots of class combinations, bloating the class hierarchy.
 
@@ -532,7 +532,7 @@ You need to create a catalog app for a car manufacturer. The company makes both 
 
 ![Composition_over_inheritance_inheritance](./Resources/Composition_over_inheritance/inheritance.jpeg)
 
-Each additional parameter results in multiplying the number of subclasses. There's a lot of duplicated code between subclasses, because you can't extend two classes at the same time.
+Each additional parameter results in multiplying the number of sub-classes. There's a lot of duplicated code between sub-classes, because you can't extend two classes at the same time.
 
 With composition, instead of a car objects implementing a behavior on their own, they can delegate it to other objects.
 
@@ -559,7 +559,7 @@ The `Employee` class has several reasons to change. One might be related to the 
 
 ![Single_responsibility_principle_bad](./Resources/SOLID/Single_responsibility_principle_bad.jpeg)
 
-Solve the problem by moving the behavior related to printing timesheet reports into a separated class.
+Solve the problem by moving the behavior related to printing time-sheet reports into a separated class.
 
 ![Single_responsibility_principle_good](./Resources/SOLID/Single_responsibility_principle_good.jpeg)
 
@@ -593,23 +593,23 @@ As a bonus, this solution let you move the delivery time calculation to more rel
 ### Liskow substitution principle
 > When extending a class, remember that you should be able to pass objects of the subclass in place of objects of the parent class without breaking the client code.
 
-This means that the subclass should remain compatible with the behavior of the superclass. When overriding a method, extend the base behavior instead of replacing it with something else.
+This means that the subclass should remain compatible with the behavior of the super-class. When overriding a method, extend the base behavior instead of replacing it with something else.
 
-This principle is a set of checks that help predict whether a subclass remains compatible with the code that was working with the superclass. This is critical when developing libraries and frameworks, because your classes are going to be used by other people whose code you can't directly access and change.
+This principle is a set of checks that help predict whether a subclass remains compatible with the code that was working with the super-class. This is critical when developing libraries and frameworks, because your classes are going to be used by other people whose code you can't directly access and change.
 
 #### Checklist
-- Parameter types in a method of a subclass should *match* or be *more abstract* than parameter types in the method of the supperclass:
+- Parameter types in a method of a subclass should *match* or be *more abstract* than parameter types in the method of the supper-class:
    - There's a class with a method that's supposed to feed cats `feed(Cat c)`. Client code always passes cat objects into this method.
-      - **GOOD**: You create a subclass that overrode the method so that it can feed any animal (a supperclass of cats): `feed(Animal c)`. Now if you pass an object to the client code, everything would still work. The method can feed all animals, so it can still feed any cat passed by the client.
+      - **GOOD**: You create a subclass that overrode the method so that it can feed any animal (a supper-class of cats): `feed(Animal c)`. Now if you pass an object to the client code, everything would still work. The method can feed all animals, so it can still feed any cat passed by the client.
       - **BAD**: You create another subclass and restricted the feeding method to only accept Bengal cats (a subclass if cats): `feed(BengalCat c)`. What will happen to the client code if oy link it with an object like this instead of with the original class? Since the method can only feed a specific breed of cats, it won't serve generic cats passed by the client, breaking all related functionality.
 
-- The return type in a method of a subclass should *match* or be a *subtype* of the return type in the method of the superclass (requirements for a return type are inverse of requirements for parameter types):
+- The return type in a method of a subclass should *match* or be a *sub-type* of the return type in the method of the super-class (requirements for a return type are inverse of requirements for parameter types):
    - You have a class with a method `Cat butCat();`. The client code expects to receive any cat as result of executing this method.
       - **GOOD**: A subclass overrides the method as follows: `BengalCat buyCat();`. The client gets a Bengal cat, which still is a cat, so everything okay.
       - **BAD**: A subclass overrides the method as follows: `Animal butCat();`. Now the client code breaks since it receives an unknown generic animal, that doesn't for a structure designed for a cat.
 
 - A method in a subclass shouldn't throw types of exceptions which the base method isn't expected to throw:
-    - Types of exceptions should *match* or be *subtypes* of the ones that the base method is already able to throw. This is because `try-catch` blocks in the client code target specific types and unexpected types might slip throw the defensive lines of the client code and crash the application.
+    - Types of exceptions should *match* or be *sub-types* of the ones that the base method is already able to throw. This is because `try-catch` blocks in the client code target specific types and unexpected types might slip throw the defensive lines of the client code and crash the application.
 
 - A subclass shouldn't strengthen pre-conditions:
     - If the base method has a parameter with type `int`. If a subclass limits the value of the argument to just positive numbers (by throwing an exception), then the client code, which used to work fine when passing negative numbers into the method, now breaks if starts working with an object of this subclass.
@@ -629,14 +629,14 @@ The resulting code also violates the open/closed principle, since the code becom
 
 ![Liskov_substitution_principle_good](./Resources/SOLID/Liskov_substitution_principle_good.jpeg)
 
-You can solve the problem by redesigning the class hierarchy. A subclass should extend the behavior of a superclass, therefore the read-only document becomes the base class of the hierarchy. The writable document is now a subclass which extends the base class and adds the saving behavior.
+You can solve the problem by redesigning the class hierarchy. A subclass should extend the behavior of a super-class, therefore the read-only document becomes the base class of the hierarchy. The writable document is now a subclass which extends the base class and adds the saving behavior.
 
 ### Interface segregation principle
 > Clients shouldn't be forced to depend on methods they do not use.
 
 Try to make your interfaces narrow enough that client  classes don't have to implement behaviors they don't need.
 
-You should break down "fat" interfaces into more granular and specific ones. Clients should only implement methods that they really need. Class inheritance lets a class have just one superclass, but it doesn't limit the number of interfaces that the class can implement, so there is no need to add lots of unrelated methods to a single interface (break them down into more refined interfaces, you can implement them all in a single class if needed).
+You should break down "fat" interfaces into more granular and specific ones. Clients should only implement methods that they really need. Class inheritance lets a class have just one super-class, but it doesn't limit the number of interfaces that the class can implement, so there is no need to add lots of unrelated methods to a single interface (break them down into more refined interfaces, you can implement them all in a single class if needed).
 
 #### Example
 You create a library that makes it easy to integrate apps with various cloud computing providers. While the initial version only supported AWS, it covered the full set of cloud services and features.
@@ -645,7 +645,7 @@ You assumed all cloud providers have the same spectrum of features as AWS, but i
 
 ![Interface_segregation_principle_bad](./Resources/SOLID/Interface_segregation_principle_bad.jpeg)
 
-You can implement these methods and put nullify some methods, but its not elegant. The better approach is to break down the interface into parts. Classes that are able to implement the original interface can just implement several refined interfaces. Other classes can implement only those interfaces wich have methods that make sense for them:
+You can implement these methods and put nullify some methods, but its not elegant. The better approach is to break down the interface into parts. Classes that are able to implement the original interface can just implement several refined interfaces. Other classes can implement only those interfaces which have methods that make sense for them:
 
 ![Interface_segregation_principle_good](./Resources/SOLID/Interface_segregation_principle_good.jpeg)
 
@@ -691,7 +691,7 @@ For this part the summary will contain the following:
 ## Creational Design patterns
 They provide various object creation mechanism which increase flexibility and reuse of existing code.
 
-- **[Factory method](#factory-method)**: Provides an interface for creating objects in superclass, but allows subclasses to alter the type of objects that will be created.
+- **[Factory method](https://refactoring.guru/design-patterns/factory-method/cpp/example)**: Provides an interface for creating objects in superclass, but allows sub-classes to alter the type of objects that will be created.
 
 - **[Abstract factory](#abstract-factory)**:  Produce families of related objects without specifying their concrete classes.
 
@@ -699,7 +699,7 @@ They provide various object creation mechanism which increase flexibility and re
 
 - **[Prototype](#prototype)**: Lets you copy existing objects without making your code dependent on their classes.
 
-- **[Singleton](#singleton)**: Lets you ensure that a class has only one instance, while providing a global access point to the instance.
+- **[Singleton](https://refactoring.guru/design-patterns/singleton/cpp/example)**: Lets you ensure that a class has only one instance, while providing a global access point to the instance.
 
 ## Structural design patterns
 Structural design patterns explain how to assemble objects
@@ -726,7 +726,7 @@ the assignment of responsibilities between objects.
 
 - **[Chain of responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility/cpp/example)**: Lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
 
-- **[Command](https://refactoring.guru/design-patterns/command/cpp/example)**: Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request's execution, and support undoable operations.
+- **[Command](https://refactoring.guru/design-patterns/command/cpp/example)**: Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request's execution, and support undo-able operations.
 
 - **[Iterator](https://refactoring.guru/design-patterns/iterator/cpp/example)**: Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 
