@@ -1,11 +1,14 @@
 # Table of contents
 
+- [Table of contents](#table-of-contents)
 - [Notes about C++](#notes-about-c)
   - [The stack and the heap](#the-stack-and-the-heap)
     - [The stack](#the-stack)
     - [The heap](#the-heap)
   - [Function pointers](#function-pointers)
   - [Lambdas](#lambdas)
+  - [lvalues and rvalues](#lvalues-and-rvalues)
+    - [What is this all for?](#what-is-this-all-for)
   - [The standard C++ library](#the-standard-c-library)
     - [Strings](#strings)
       - [What's in a string?](#whats-in-a-string)
@@ -36,6 +39,10 @@
 - [Casting](#casting)
   - [Dynamic casting](#dynamic-casting)
 - [Exception handling](#exception-handling)
+  - [Re-throwing exceptions](#re-throwing-exceptions)
+    - [Throw a new exception](#throw-a-new-exception)
+    - [The wrong way](#the-wrong-way)
+    - [The right way](#the-right-way)
 - [Good practices](#good-practices)
   - [Pointers](#pointers)
     - [Passing objects](#passing-objects)
@@ -69,7 +76,7 @@ int f(int a)
     if (0 < a)
     {
         std::string s = "a positive number";
-        std::cout << s << '\n';
+        std::cout << s << "\n";
     }
     return a;
 }
@@ -169,7 +176,7 @@ This reduces the like-hood of the three most common and destructive C programmin
 The **string** class lets you:
 - Create an empty **string** and defer initializing it with character data.
 - Initialize a **string** by passing a literal, quoted character array as an argument to the constructor.
-- Initialize a **string** using '='.
+- Initialize a **string** using `=`.
 - Use one **string** to initialize another.
 ```
 #include <string>
@@ -244,7 +251,7 @@ The iterators are not restricted to **begin()** and **end()**, so you can choose
 int main() 
 {
  // Error: no single char inits
- std::string nothingDoing1('a');
+ std::string nothingDoing1("a");
  // Error: no integer inits
  std::string nothingDoing2(0x37);
 }
@@ -311,7 +318,7 @@ int main()
 {
  std::string s("A piece of text");
  std::string tag("$tag$");
- s.insert(8, tag + ' ');
+ s.insert(8, tag + " ");
  std::cout << s << std::endl;
  
  int start = s.find(tag);
@@ -381,13 +388,13 @@ Notice that **replace()** expands the array to accommodate the growth of the str
 
 
 #### Simple character replacement using the STL replace() algorithm
-The **string** class doesn't define a way to replace all the Validacioninstances of a character with another. 
+The **string** class doesn't define a way to replace all the instances of a character with another. 
 
 
 STL algorithms came in handy here, because an **string** class can look just like an STL container (STL algorithms work with anything that looks like an STL container). All the STL algorithms work on a "range" of elements within a container. Usually that range is just "from the beginning of the container to the end". 
 
 
-A **string** object looks like a container of characters (from **string::begin()** to **string::end()**). The following example shows the use of STL **replace()** algorithm to replace all instances of 'X with 'Y'.
+A **string** object looks like a container of characters (from **string::begin()** to **string::end()**). The following example shows the use of STL **replace()** algorithm to replace all instances of `X` with `Y`.
 
 ```
 #include <string>
@@ -398,12 +405,12 @@ int main()
 {
  std::string s("aaaXaaaXXaaXXXaXXXXaaa");
  std::cout << s << std::endl;
- replace(s.begin(), s.end(), 'X', 'Y');
+ replace(s.begin(), s.end(), "X", "Y");
  std::cout << s << std::endl;
 } 
 ```
-> output:
-aaaXaaaXXaaXXXaXXXXaaa
+> output: \
+aaaXaaaXXaaXXXaXXXXaaa \
 aaaYaaaYYaaYYYaYYYYaaa
 
 Notice that this **replace()** is not called as member function of **string**. Unlike **string::replace()** functions with only performs one replacement, STL replace is replacing all instances of one character with another.
@@ -440,10 +447,10 @@ int main()
 }
 ```
 
-> output:
-This
-This That
-This That The other
+> output: \
+This \
+This That \
+This That The other \
 This That The other ooh lala 
 
 ### Searching in strings 
@@ -523,9 +530,6 @@ int main(int argc, char* argv[])
 } 
 ```
 You create the FileClass object and use it in normal C file I/O function calls by calling **fp()**. When you're done with it, just forget about it, and the file is closed by the destructor at the end of the scope. 
-
-file:///home/sebas/Documents/Mega/Estudio/Bibliografia/Bibliografia%20General/Programming/C++/Thinking%20in%20C++.pdf
-68
 
 ## True wrapping
 Even though the FILE pointer is private, it isn't particularly safe because **fp()** retrieves it. The only effect seems to be guaranteed initialization and cleanup, so why not make it public, or use a **struct** instead? Notice that while you can get a copy of **f** using **fp()**, you cannot assign
@@ -866,7 +870,7 @@ void fun()
   {
     logError("error in fun");
     
-    throw 'q'; // throw char exception 'q' up the stack to be handled by caller of fun()
+    throw "q"; // throw char exception "q" up the stack to be handled by caller of fun()
   }
 }
 ```
@@ -939,7 +943,7 @@ int main()
         {
             std::cout << "Caught Base b, which is actually a ";
             b.print();
-            std::cout << '\n';
+            std::cout << "\n";
             throw b; // the Derived object gets sliced here
         }
     }
@@ -947,17 +951,17 @@ int main()
     {
         std::cout << "Caught Base b, which is actually a ";
         b.print();
-        std::cout << '\n';
+        std::cout << "\n";
     }
 
     return 0;
 }
 ```
-```
-OUTPUT:
-Caught Base b, which is actually a Derived
+
+> OUTPUT: \
+Caught Base b, which is actually a Derived \
 Caught Base b, which is actually a Base 
-```
+
 
 ### The right way
 C++ provides a way to re-throw the same exception that was caught. An its actually really simple:
@@ -990,7 +994,7 @@ int main()
         {
             std::cout << "Caught Base b, which is actually a ";
             b.print();
-            std::cout << '\n';
+            std::cout << "\n";
             throw b; // the Derived object gets sliced here
         }
     }
@@ -998,7 +1002,7 @@ int main()
     {
         std::cout << "Caught Base b, which is actually a ";
         b.print();
-        std::cout << '\n';
+        std::cout << "\n";
     }
 
     return 0;
@@ -1205,7 +1209,7 @@ T f()
   return result;
 }
 ```
-But, like with the RVO, the function still needs to return a unique object (which is the case on the above example), so that the compiler can determine which object inside of 'f' it has to construct at the memory location of t (outside of f).
+But, like with the RVO, the function still needs to return a unique object (which is the case on the above example), so that the compiler can determine which object inside of `f` it has to construct at the memory location of t (outside of f).
 
 For example, the NRVO can still be applied in the following case, because only one object (result) can be returned from the function.
 ```
@@ -1224,4 +1228,3 @@ T f()
 > FINAL NOTE: you can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
 ## Move semantics
-
