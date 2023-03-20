@@ -45,6 +45,7 @@
   - [++prefix forms are preferred against postfix++](#prefix-forms-are-preferred-against-postfix)
   - [Return Value Optimization (RVO)](#return-value-optimization-rvo)
   - [Name Return Value Optimization (NRVO)](#name-return-value-optimization-nrvo)
+- [Standard Algorithms](#standard-algorithms)
   - [Move semantics](#move-semantics)
 
 # Notes about C++
@@ -152,7 +153,7 @@ X a4(v);
 ```
 Of these, only the first one can be used in every context, and is less error-prone.
 
-```
+```C++
 void fun(double val, int val2) 
 {
 
@@ -179,40 +180,40 @@ Prefer {} initialization over alternatives unless you have a strong reason not t
 ## Static
 The meanings changes depending on context and we have three scenarios:
 - **Static Variables**: 
-	- In a function.
-	- In a class.
+  - In a function.
+  - In a class.
 - **Static methods in a Class**.
 
 ### Static Variables
 - In a function:
-	- The variable gets allocated for the lifetime of the program. 
-	- Their scope is internal, and only visible on the translation unit.
+  - The variable gets allocated for the lifetime of the program. 
+  - Their scope is internal, and only visible on the translation unit.
 
 - In a class:
-	- Are initialized only once and shared between all instances of the objects (of the same class). 
-	- You need to initialize static variables outside of the class definition. Static variables can not be **initialized** using constructors or inline.
-	- This variable is not longer associated with an specific object but with the class. Useful when we need to describe the whole population of classes (example: amount of instances).
-	- Its a good idea to implement static methods to access static variables.
+  - Are initialized only once and shared between all instances of the objects (of the same class). 
+  - You need to initialize static variables outside of the class definition. Static variables can not be **initialized** using constructors or inline.
+  - This variable is not longer associated with an specific object but with the class. Useful when we need to describe the whole population of classes (example: amount of instances).
+  - Its a good idea to implement static methods to access static variables.
 
 #### Initialization of Static Variables
 - There is a category of variables that can (and should) be initialized before the program starts:
-	- Static variables.
-	- Global (namespace) variables.
-	- Static class members.
+  - Static variables.
+  - Global (namespace) variables.
+  - Static class members.
 - They live for the entire execution of the program and must be initialized before `main()` is run and destroyed after execution finished, this is called *Static storage duration*.
 
 ##### Two stages of static variable initialization
 Variables  with *Static storage duration* must be initialized once before the program start and destroyed after execution terminates. Initialization could happen in two consecutive stages:
 - Static initialization:
-	- Happens first and usually at compile time. If possible, initial values for static variables are evaluated during compilation and burned into the data section of the executable.
-	- Zero runtime overhead, early problem diagnosis and safety are advantages of this called [constant initialization](https://en.cppreference.com/w/cpp/language/constant_initialization). Ideally, all static variables are *const-initialized*.
-	- If the initial value of static variable can't be evaluated at compile time, the compiler will perform *zero-initialization*. So, during static initialization, all static variables are either *const-initialized* or *zero-initialized*.
+  - Happens first and usually at compile time. If possible, initial values for static variables are evaluated during compilation and burned into the data section of the executable.
+  - Zero runtime overhead, early problem diagnosis and safety are advantages of this called [constant initialization](https://en.cppreference.com/w/cpp/language/constant_initialization). Ideally, all static variables are *const-initialized*.
+  - If the initial value of static variable can't be evaluated at compile time, the compiler will perform *zero-initialization*. So, during static initialization, all static variables are either *const-initialized* or *zero-initialized*.
 - Dynamic initialization:
-	- Takes place after static initialization. Happens at runtime for variables that can't be evaluated at compile time. Here, static variables are initialized every time the executable is run and not just during compilation.
+  - Takes place after static initialization. Happens at runtime for variables that can't be evaluated at compile time. Here, static variables are initialized every time the executable is run and not just during compilation.
 
 #### The green Zone - Constant initialization
 Is ideal, and the compiler will try to perform it whenever it can. This is the case when your variable is initialized by a [constant expression](https://en.cppreference.com/w/cpp/language/constant_expression), that is an expression that can be evaluated at compile time.
-```
+```C++
 struct MyStruct
 {
     static int a;
@@ -222,7 +223,7 @@ int MyStruct::a = 67;
 
 ##### Force Const Initialization - *constexpr*
 Its not always clear if a variable is being initialized at compile time or at runtime. To make sure variables are initialized at compile time is by declaring them `constexpr`.
-```
+```C++
 struct Point
 {
     float x{};
@@ -258,7 +259,7 @@ Is a keyword introduced in the **C++20 standard**. Works just as `constexpr`, as
 
 Variables declared `constinit` are always const-zero or const-initialized, but can be mutated at runtime.
 
-```
+```C++
 constexpr auto N1{54}; // OK const-init ensured
 constinit auto N2{67}; // OK const-init ensured, mutable
 
@@ -279,15 +280,19 @@ int main()
 #### The Yellow Zone - Dynamic Initialization
 Imagine you need and immutable global `std::string` to store the software version. You don't want this object to be instantiated every time the program runs, but rather create it once and embed into the executable as read-only memory. In other words, you want a `constexpr`:
 
-`constexpr auto VERSION = std::string("3.1.4");`
+```C++
+constexpr auto VERSION = std::string("3.1.4");
+```
 
 The problem is that the compiler will tell you:
 
-`error: constexpr variable cannot have non-literal type`
+> error: constexpr variable cannot have non-literal type
 
 The compiler complains because `std::string` defines a non-trivial destructor. This means that `std::string` is allocating some resources that must be freed on destruction, memory in this case. In other words, `std::string("3.1.4")` is not a constant expression. A workaround is the following:
 
-`const auto VERSION = std::string("3.4.1");`
+```C++ 
+const auto VERSION = std::string("3.4.1");
+```
 
 The compiler doesn't complain but at the cost of moving the initialization to runtime. Now `VERSION` must be part of a dynamic initialization, not static. This approach is less efficient and less safe that static initialization (not that bad either).
 
@@ -298,15 +303,14 @@ Withing a single compilation unit, static variables are initialized in the same 
 
 Across compilation units, the order is undefined, and this is an issue if the initialization of a variable in `a.cpp` depends on another defined in `b.cpp`. This is called [Static Initialization Order Fiasco](https://isocpp.org/wiki/faq/ctors#static-init-order):
 
-```
+```C++
 // a.cpp
 int duplicate(int n)
 {
     return n * 2;
 }
 auto A = duplicate(7); // A is dynamic-initialized
-```
-```
+
 // b.cpp
 #include <iostream>
 
@@ -333,7 +337,7 @@ If refactoring is not an option, one solution is the [Initialization On First Us
 
 With this strategy it is possible to control the time when static variables are initialized at runtime, avoiding use-before-init.
 
-```
+```C++
 // a.cpp
 int duplicate(int n)
 {
@@ -345,8 +349,8 @@ auto& A()
   static auto a = duplicate(7); // Initiliazed first time A() is called
   return a;
 }
-```
-```
+
+
 // b.cpp
 #include <iostream>
 #include "a.h"
@@ -376,7 +380,8 @@ This program will always consistently print `14`, as it is guaranteed that `A` w
 
 ### Static methods
 They don't depend on the objects of the class. We are allowed to invoke static methods using the object and the `.` or `->` operators, but its recommended to invoke static methods using the class name and the scope resolution operator `::`.
-```
+
+```C++
 class User
 {
     static int users_ammout;
@@ -426,8 +431,8 @@ Exceptions provide a way to transfer control from one part of a program to anoth
   - Follows a **try** block.
   - You can specify what type of exception you want to catch.
   - You could have different catch statements for different exception types.
-
-```
+ 
+```C++
 #include <iostream>
 
 void fun(auto val)
@@ -461,7 +466,8 @@ int main()
 Occasionally you may run into a case where you want to catch an exception, but not want to (or have the ability to) fully handle it at the point where you catch it. This is common when you want to log an error, but pass the issue along to the caller to actually handle.
 
 ### Throw a new exception
-```
+
+```C++
 void fun()
 {
   try
@@ -479,7 +485,8 @@ void fun()
 - The exception from the catch block can be an exception of any type. It doesn't need to be the same type as the one that was caught.
 
 ### The wrong way
-```
+
+```C++
 void fun()
 {
   try
@@ -499,7 +506,8 @@ Although this works, this method has a couple of downsides.
 - This doesn't throw the exact same exception as the one that is caught, rather a copy-initialized copy (this could be less performant).
 
 - But the worst scenario arises here:
-```
+
+```C++
 void fun()
 {
   try
@@ -516,7 +524,8 @@ void fun()
 ```
 
 In this case, insideFun() throws a **Derived object**, but the catch block is getting a **Base reference**. When we re-throw the exception its doing so with a copy-initialized exception of type Base (not derived). Our Derived object has been sliced!.
-```
+
+```C++
 #include <iostream>
 
 class Base
@@ -567,7 +576,8 @@ Caught Base b, which is actually a Base
 
 ### The right way
 C++ provides a way to re-throw the same exception that was caught. An its actually really simple:
-```
+
+```C++
 #include <iostream>
 
 class Base
@@ -680,7 +690,8 @@ The various types of pointers are there to **express a design** in the code. Her
 This pointer is the sole owner of a memory resource. It will hold a pointer and delete it in its destructor (unless you customize it).
 
 This allows you to express your intentions in an interface. Consider the following function:
-```
+
+```C++
 std::unique_ptr<House> buildAHouse();
 ```
 It gives you a pointer to a house, of which you are the owner. *No one else will delete this pointer*, except the unique_ptr returned from the function. 
@@ -689,12 +700,14 @@ It gives you a pointer to a house, of which you are the owner. *No one else will
   
 
 Note though that even when you receive a unique_ptr, you're not guaranteed that no one else has access to this pointer. If another context keeps a copy of the pointer inside your unique_ptr, then modifying the pointed object through the unique_ptr object will impact this other context. If you don't want this to happen, you can express it in the following way:
-```
+
+```C++
 std::unique_ptr<const House> buildAHouse(); // for some reason, I don't want you
                                             // to modify the house you're being passed
 ```
 To ensure only one unique_ptr own a memory resource, std::unique_ptr cannot be copied. But the ownership can be transferred by moving a unique_ptr into another one.
-```
+
+```C++
 std::unique_ptr<int> p1 = std::make_unique(42);
 std::unique_ptr<int> p2 = move(p1); // now p2 hold the resource
                                     // and p1 no longer hold anything
@@ -704,7 +717,8 @@ std::unique_ptr<int> p2 = move(p1); // now p2 hold the resource
 They share a lot with references, but the latter is preferred (except in some cases). The important thing to focus is that **raw pointers and references represent access to an object, but not ownership**. And this is the default way of passing objects to functions and methods.
 
 This is relevant when you hold an object with an unique_ptr and want to pass it to an interface. You don't pass the unique_ptr, nor a reference to it, but a reference to the pointed object.
-```
+
+```C++
 std::unique_ptr<House> house = buildAHouse();
 renderHouse(*house);
 ```
@@ -726,7 +740,8 @@ One good case for using it is when objects are **shared in the domain**.
 Can hold a reference to a shared object, but they don't increment the reference count. If no std::shared_ptr are holding an object, it will be deleted even if some weak pointers still point to it.
 
 For this reason, weak_ptr need to check if an object is still alive. For this it has to be copied into a shared_ptr:
-```
+
+```C++
 void useMyWeakPointer(std::weak_ptr<int> wp)
 {
     if (std::shared_ptr<int> sp = wp.lock())
@@ -741,7 +756,8 @@ void useMyWeakPointer(std::weak_ptr<int> wp)
 ```
 
 A typical use case for this is about breaking shared_ptr circular references. Consider the following code:
-```
+
+```C++
 struct House
 {
     std::shared_ptr<House> neighbour;
@@ -764,7 +780,8 @@ Deprecated in C++11 and removed on C++17.
 
 ## ++prefix forms are preferred against postfix++
 This is due to the overhead presented on the former:
-```
+
+```C++
 T& T::operator++()                T& T::operator--()      // the prefix form:
 {                                 { 
   // perform increment              // perform decrement  // - do the work
@@ -787,7 +804,8 @@ This happens when two conditions are meet:
 > NOTE: at the assembly level, the compiler always passes at least one parameter, this is the return address.
 
 RVO can still apply even when the function has several return statements, as long as the returned objects are created on the return statements, therefore this object does not have a name:
-```
+
+```C++
 T f()
 {
   if (...)
@@ -803,7 +821,8 @@ T f()
 
 ## Name Return Value Optimization (NRVO)
 It can remove the intermediary objects even if the returned object has a name and is therefore not constructed on the return statement. So this object can be constructed before the return statement, like in the following example:
-```
+
+```C++
 T f()
 {
   T result(...);
@@ -814,7 +833,8 @@ T f()
 But, like with the RVO, the function still needs to return a unique object (which is the case on the above example), so that the compiler can determine which object inside of `f` it has to construct at the memory location of t (outside of f).
 
 For example, the NRVO can still be applied in the following case, because only one object (result) can be returned from the function.
-```
+
+```C++
 T f()
 {
   T result(...);
@@ -826,7 +846,58 @@ T f()
   return result;
 }
 ```
+**FINAL NOTE**
+You can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
-> FINAL NOTE: you can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
+## Clearer interfaces
+Sometimes we need to represent a value that is "empty", "null" or "not set" on the return of a function. There are many approaches to this:
+- **Return a special value**, like -1 where a positive integer is expected or "". 
+  - This is brittle because this values may actually be meaningful values, now or later, or be set by accident.
+- **Returning a boolean or an **error code** indicating whether the function has succeed and the result is passed through a function parameter.
+  - This is brittle and clumsy, because nothing enforces that the caller checks the return value and makes the surrounding code harder to write and read.
+- **Throwing an exception**. This is good but not always usable, because surrounding code has then to be exception-safe.
+
+One alternative is the use of **optional<T>**.
+
+### What is optional?
+For a given type T, optional<T> represents an object that can be:
+- A value of type T
+- An empty value
+
+This way a new value is added to the possible values that T can hold (replacing the use of -1 or "") to represent "empty" or "not set".
+
+An example of use could be:
+
+```C++
+#include <iostream>
+#include <optional>
+#include <string>
+
+std::optional<std::string> fun(int control)
+{
+    if (0 == control)
+    {
+        return "Success";
+    }
+
+    return std::nullopt;
+}
+
+int main()
+{
+  auto var = fun(0);
+  if (var)
+  {
+    std::cout << var.value() << std::endl;
+  }
+  else
+  {
+    std::cout << "not set" << std::endl;
+  }
+}
+```
+
+# Standard Algorithms
+
 
 ## Move semantics
