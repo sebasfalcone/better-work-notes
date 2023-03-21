@@ -45,8 +45,12 @@
   - [++prefix forms are preferred against postfix++](#prefix-forms-are-preferred-against-postfix)
   - [Return Value Optimization (RVO)](#return-value-optimization-rvo)
   - [Name Return Value Optimization (NRVO)](#name-return-value-optimization-nrvo)
+  - [Clearer interfaces](#clearer-interfaces)
+    - [What is optional?](#what-is-optional)
 - [Standard Algorithms](#standard-algorithms)
   - [Move semantics](#move-semantics)
+- [Interesting implementations](#interesting-implementations)
+  - [Defer](#defer)
 
 # Notes about C++
 
@@ -58,7 +62,7 @@ C++ has several types of memories that correspond to different parts of the phys
 
 ### The stack
 The default way to store objects in C++:
-```
+```C++
 int f(int a)
 {
     if (0 < a)
@@ -69,10 +73,11 @@ int f(int a)
     return a;
 }
 ```
+
 Here **a** and **s** are stored (pushed) on the stack, also they are next to one another in memory, hence the name stack. The most important part is that **objects allocated on the stack are automatically destroyed when they go out of scope**.
 
 The scope is defined by a pair of **{}**, except those used to initialize objects: 
-```
+```C++
 std::vector<int> v = {1, 2, 3}; // this is not a scope
 
 if (0 < v.size())
@@ -80,21 +85,22 @@ if (0 < v.size())
     ...
 } // this is the end of a scope
 ```
-There are three ways for an objects to go out of scope:
+
+There are three ways for objects to go out of scope:
 - Encountering the next closing bracket **}**.
 - Encountering a return statement.
 - Having an exception thrown inside the current scope that is not caught inside the current scope.
 
 ### The heap
-The heap is where dynamically allocated objects are stored, that is to say **objects that are allocated with a call to new**, which returns a pointer. In reality the heap is the memory allocated by **malloc**, **calloc** and **realloc**, and new stores it in the **free store** (but the term is used anyways).
+The heap is where dynamically allocated objects are stored, that is to say, **objects that** are allocated with a call to new**, which returns a pointer. In reality, the heap is the memory allocated by **malloc**, **calloc** and **realloc**, and new stores it in the **free store** (but the term is used anyways).
 
-Objects stored on the heap are **not destroyed automatically** but when **delete** is called. This offers the advantage of keeping them longer than then end of a scope, and without incurring any copy except those of pointers (which are cheap). 
+Objects stored on the heap are **not destroyed automatically** but when **delete** is called. This offers the advantage of keeping them longer than the end of a scope, and without incurring any copy except those of pointers (which are cheap). 
 
 > NOTE: Pointers allow to manipulate objects polymorphically. A pointer to a base class can point to objects of any derived class.
 
-The price for this flexibility is that the developer is in charge of the deletion on this objects also called deallocation. Deleting an object on the heap is not trivial, because delete has to be called **once and only once**, doing so leads to *undefined behavior*. If the memory is not deallocated, then this memory space is not reusable, this is called a *memory leak*.
+The price for this flexibility is that the developer is in charge of the deletion of these objects also called deallocation. Deleting an object on the heap is not trivial, because delete has to be called **once and only once**, doing so leads to *undefined behavior*. If the memory is not deallocated, then this memory space is not reusable, this is called a *memory leak*.
 
-As you can see, this is a problem. Latter we will see the concept of [smart pointers](#smart-pointers) which will help us on this task.
+As you can see, this is a problem. Later we will see the concept of [smart pointers](#smart-pointers) which will help us with this task.
 
 ## Function pointers
 A way to assign a function to a variable.
@@ -110,7 +116,7 @@ In C++, every expression is either an lvalue or an rvalue:
     - In `int y = f(x)`, x and y are objects names and are lvalues).
     - In the expression `myVector[0]` is also an lvalue.
 - An **rvalue** denotes an object whose resources can be reused.
-  - This typically include *temporary objects* as they can't be manipulated at the place they are created and are soon to be destroyed.
+  - This typically includes *temporary objects* as they can't be manipulated at the place they are created and are soon to be destroyed.
     - In the expression `g(MyClass())`, `MyClass()` designates a temporary object that `g` can modify without impacting the code surrounding the expression.
 
 - An **lvalue reference** is a reference that binds to an lvalue. They are marked with one ampersand.
@@ -119,39 +125,42 @@ In C++, every expression is either an lvalue or an rvalue:
 > NOTE: There is one exception, it can be an lvalue const reference binding to an rvalue. 
 
 ### What is this all for?
-rvalue references add the possibility to express a new intention in code: **disposable objects**. Passing objects as a reference means *you no longer care about it*.
-```
+rvalue references add the possibility to express a new intention in code: **disposable objects**. Passing objects as a reference means *you no longer care about them*.
+```C++
 void f(MyClass&& x)
 {
   ...
 }
 ```
+
 The message is "the object that `x` binds to is YOURS. Do whatever you like with it". It's a bit like giving a copy to f, but without the copy.
 
 This can be interesting for two purposes:
 - Improving performance (see move constructors).
 - Taking over ownership (since the object the reference binds to has been abandoned by the caller).
 
-No that this could not be achieved with lvalue references. For example:
-```
+Note that this could not be achieved with lvalue references. For example:
+```C++
 void f(MyClass& x)
 {
   ...
 }
 ```
-You can modify the value of the object that x binds to, but since it is an lvalue reference, it means that somebody probably cares about it at call site.
+
+You can modify the value of the object that x binds to, but since it is an lvalue reference, it means that somebody probably cares about it at the call site.
 
 //TODO
 
 ## Initialization
 If an initializer is specified for an object, that initializer determines the initial value of an object. We can use one of the four syntactic styles:
-```
+```C++
 X a1 {v};
 X a2 = {v};
 X a3 = v;
 X a4(v);
 ```
-Of these, only the first one can be used in every context, and is less error-prone.
+
+Of these, only the first one can be used in every context and is less error-prone.
 
 ```C++
 void fun(double val, int val2) 
@@ -178,7 +187,7 @@ void fun(double val, int val2)
 Prefer {} initialization over alternatives unless you have a strong reason not to.
 
 ## Static
-The meanings changes depending on context and we have three scenarios:
+The meanings change depending on context and we have three scenarios:
 - **Static Variables**: 
   - In a function.
   - In a class.
@@ -187,32 +196,33 @@ The meanings changes depending on context and we have three scenarios:
 ### Static Variables
 - In a function:
   - The variable gets allocated for the lifetime of the program. 
-  - Their scope is internal, and only visible on the translation unit.
+  - Their scope is internal, and only visible in the translation unit.
 
 - In a class:
   - Are initialized only once and shared between all instances of the objects (of the same class). 
   - You need to initialize static variables outside of the class definition. Static variables can not be **initialized** using constructors or inline.
-  - This variable is not longer associated with an specific object but with the class. Useful when we need to describe the whole population of classes (example: amount of instances).
-  - Its a good idea to implement static methods to access static variables.
+  - This variable is no longer associated with a specific object but with the class. Useful when we need to describe the whole population of classes (for example amount of instances).
+  - It's a good idea to implement static methods to access static variables.
 
 #### Initialization of Static Variables
 - There is a category of variables that can (and should) be initialized before the program starts:
   - Static variables.
   - Global (namespace) variables.
   - Static class members.
-- They live for the entire execution of the program and must be initialized before `main()` is run and destroyed after execution finished, this is called *Static storage duration*.
+- They live for the entire execution of the program and must be initialized before `main()` is run and destroyed after execution is finished, this is called *Static storage duration*.
 
 ##### Two stages of static variable initialization
-Variables  with *Static storage duration* must be initialized once before the program start and destroyed after execution terminates. Initialization could happen in two consecutive stages:
+Variables with *Static storage duration* must be initialized once before the program start and destroyed after execution terminates. Initialization could happen in two consecutive stages:
 - Static initialization:
   - Happens first and usually at compile time. If possible, initial values for static variables are evaluated during compilation and burned into the data section of the executable.
   - Zero runtime overhead, early problem diagnosis and safety are advantages of this called [constant initialization](https://en.cppreference.com/w/cpp/language/constant_initialization). Ideally, all static variables are *const-initialized*.
-  - If the initial value of static variable can't be evaluated at compile time, the compiler will perform *zero-initialization*. So, during static initialization, all static variables are either *const-initialized* or *zero-initialized*.
+  - If the initial value of the static variable can't be evaluated at compile time, the compiler will perform *zero-initialization*. So, during static initialization, all static variables are either *const-initialized* or *zero-initialized*.
 - Dynamic initialization:
   - Takes place after static initialization. Happens at runtime for variables that can't be evaluated at compile time. Here, static variables are initialized every time the executable is run and not just during compilation.
 
 #### The green Zone - Constant initialization
-Is ideal, and the compiler will try to perform it whenever it can. This is the case when your variable is initialized by a [constant expression](https://en.cppreference.com/w/cpp/language/constant_expression), that is an expression that can be evaluated at compile time.
+Is ideal, and the compiler will try to perform it whenever it can. This is the case when your variable is initialized by a [constant [expression](https://en.cppreference.com/w/cpp/language/constant_expression), which is an expression that can be evaluated at compile time.
+
 ```C++
 struct MyStruct
 {
@@ -222,7 +232,8 @@ int MyStruct::a = 67;
 ```
 
 ##### Force Const Initialization - *constexpr*
-Its not always clear if a variable is being initialized at compile time or at runtime. To make sure variables are initialized at compile time is by declaring them `constexpr`.
+It's not always clear if a variable is being initialized at compile time or at runtime. To make sure variables are initialized at compile time by declaring them `constexpr`.
+
 ```C++
 struct Point
 {
@@ -252,7 +263,8 @@ struct Line
 // Compile error, l can't be const-initialized (no constexpr constructor)
 constexpr Line l({6.7f, 5.7f}, {5.4, 3.2});
 ```
-`constexpr` must be your first choice when declaring global variables (assuming you really need a global state to begin with). `constexpr` variables are not just initialized at compile time, but constexpr implies const and immutable state is always the right way.
+
+`constexpr` must be your first choice when declaring global variables (assuming you need a global state, to begin with). `constexpr` variables are not just initialized at compile time, but constexpr implies const and immutable state is always the right way.
 
 ##### Your Second Line of Defense - *constinit*
 Is a keyword introduced in the **C++20 standard**. Works just as `constexpr`, as it forces the compiler to evaluate a variable at compile time, but it **doesn't imply const**.
@@ -278,7 +290,7 @@ int main()
 ```
 
 #### The Yellow Zone - Dynamic Initialization
-Imagine you need and immutable global `std::string` to store the software version. You don't want this object to be instantiated every time the program runs, but rather create it once and embed into the executable as read-only memory. In other words, you want a `constexpr`:
+Imagine you need an immutable global `std::string` to store the software version. You don't want this object to be instantiated every time the program runs, but rather create it once and embed it into the executable as read-only memory. In other words, you want a `constexpr`:
 
 ```C++
 constexpr auto VERSION = std::string("3.1.4");
@@ -294,12 +306,12 @@ The compiler complains because `std::string` defines a non-trivial destructor. T
 const auto VERSION = std::string("3.4.1");
 ```
 
-The compiler doesn't complain but at the cost of moving the initialization to runtime. Now `VERSION` must be part of a dynamic initialization, not static. This approach is less efficient and less safe that static initialization (not that bad either).
+The compiler doesn't complain but at the cost of moving the initialization to runtime. Now `VERSION` must be part of dynamic initialization, not static. This approach is less efficient and less safe than static initialization (not that bad either).
 
 #### The Red Zone - Static Initialization Order Fiasco
 The problem with *dynamic initialization* is that the order in which variables are initialized at runtime is not always well defined.
 
-Withing a single compilation unit, static variables are initialized in the same order as they are defined in the source (*Ordered Dynamic Initialization*). 
+Within a single compilation unit, static variables are initialized in the same order as they are defined in the source (*Ordered Dynamic Initialization*). 
 
 Across compilation units, the order is undefined, and this is an issue if the initialization of a variable in `a.cpp` depends on another defined in `b.cpp`. This is called [Static Initialization Order Fiasco](https://isocpp.org/wiki/faq/ctors#static-init-order):
 
@@ -324,14 +336,14 @@ int main()
 }
 ```
 
-This program is ill-formed. It may print `14` or `0` (all static variables are at leas zero-initialized), depending if the dynamic initialization of `A` happens before `B` or not.
+This program is ill-formed. It may print `14` or `0` (all static variables are at least zero-initialized), depending if the dynamic initialization of `A` happens before `B` or not.
 
-**NOTE**: This can only happen during dynamic initialization phase. Is impossible to access values defined in another compilation unit on static initialization (and this is the safety part that we talk before).
+**NOTE**: This can only happen during the dynamic initialization phase. Is impossible to access values defined in another compilation unit on static initialization (and this is the safety part that we talk before).
 
 ##### Solving The Static Initialization Order Fiasco
-Encountering this problem is often symptom of poor software design. The best way to solve it is to refactor the code to break the initialization dependency of global across compilation units. Modules should be self-contained and strive for constant initialization.
+Encountering this problem is often a symptom of poor software design. The best way to solve it is to refactor the code to break the initialization dependency of global across compilation units. Modules should be self-contained and strive for constant initialization.
 
-If refactoring is not an option, one solution is the [Initialization On First User](https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use). The basic idea is to create static variables that are initialized at runtime, when it is the first time they are accessed. 
+If refactoring is not an option, one solution is the [initialization on first use](https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use). The basic idea is to create static variables that are initialized at runtime when it is the first time they are accessed. 
 
 > Side note: This idea is used on the [singleton](https://refactoring.guru/design-patterns/singleton).
 
@@ -369,17 +381,17 @@ This program will always consistently print `14`, as it is guaranteed that `A` w
 ### Summary
 - Static variables must be initialized before the program starts.
 - Variables that can be evaluated at compile time (those initialized by a constant expression) are const-initialized.
-- All other static variables are zero-initialized during static initialization
+- All other static variables are zero-initialized during static initialization.
 - `constexpr` forces the evaluation of a variable as a constant expression and implies const.
-- `constinit` forces the evaluation of a variable as a constant expression and doesn't implies const.
-- After static initialization dynamic initialization takes places, which happens at runtime before main().
+- `constinit` forces the evaluation of a variable as a constant expression and doesn't imply const.
+- After static initialization, dynamic initialization takes place, which happens at runtime before main().
 - Within a compilation unit static variables are initialized in the order of declaration.
 - The order of initialization of static variables is undefined across compilation units.
 - You can use the *Initialization On First Use Idiom* to circumvent the *static initialization order fiasco*.
 
 
 ### Static methods
-They don't depend on the objects of the class. We are allowed to invoke static methods using the object and the `.` or `->` operators, but its recommended to invoke static methods using the class name and the scope resolution operator `::`.
+They don't depend on the objects of the class. We are allowed to invoke static methods using the object and the `.` or `->` operators, but it's recommended to invoke static methods using the class name and the scope resolution operator`::`.
 
 ```C++
 class User
@@ -463,7 +475,7 @@ int main()
 ```
 
 ## Re-throwing exceptions
-Occasionally you may run into a case where you want to catch an exception, but not want to (or have the ability to) fully handle it at the point where you catch it. This is common when you want to log an error, but pass the issue along to the caller to actually handle.
+Occasionally you may run into a case where you want to catch an exception but do not want to (or have the ability to) fully handle it at the point where you catch it. This is common when you want to log an error, but pass the issue along to the caller to handle it.
 
 ### Throw a new exception
 
@@ -503,7 +515,7 @@ void fun()
 ```
 Although this works, this method has a couple of downsides. 
 
-- This doesn't throw the exact same exception as the one that is caught, rather a copy-initialized copy (this could be less performant).
+- This doesn't throw the same exception as the one that is caught, but rather a copy-initialized copy (this could be less performant).
 
 - But the worst scenario arises here:
 
@@ -523,7 +535,7 @@ void fun()
 }
 ```
 
-In this case, insideFun() throws a **Derived object**, but the catch block is getting a **Base reference**. When we re-throw the exception its doing so with a copy-initialized exception of type Base (not derived). Our Derived object has been sliced!.
+In this case, `insideFun()` throws a **Derived object**, but the catch block is getting a **Base reference**. When we re-throw the exception it's doing so with a copy-initialized exception of type Base (not derived). Our Derived object has been sliced!
 
 ```C++
 #include <iostream>
@@ -575,7 +587,7 @@ Caught Base b, which is actually a Base
 
 
 ### The right way
-C++ provides a way to re-throw the same exception that was caught. An its actually really simple:
+C++ provides a way to re-throw the same exception that was caught:
 
 ```C++
 #include <iostream>
@@ -620,13 +632,14 @@ int main()
     return 0;
 }
 ```
-```
+
+```bash
 OUTPUT:
 Caught Base b, which is actually a Derived
 Caught Base b, which is actually a Derived
 ```
 
-And this has the advantage that no copies are made. So no performance killing copies or slicing.
+And this has the advantage that no copies are made. So no performance-killing copies or slicing.
 
 # Good practices
 
@@ -638,19 +651,20 @@ And disadvantages.
 - Double free.
 - Free on de-referenced pointer.
 - De-reference on invalid memory address (0x00000001 -> null check won't help).
-If we talk about raw pointers, we should avoid their use entirely and use some C++ idiomatic feature.
+If we talk about raw pointers, we should avoid their use entirely and use some C++ idiomatic features.
 
 ### Passing objects 
-C++ introduce the concept of reference, which by design are *not null*, that allow to pass large objects with minimal cost. And returning objects by value benefits from the[RVO](#return-value-optimization-rvo), [NRVO](#name-return-value-optimization-nrvo) and from [move semantics](#move-semantics) to allow minimal cost in many cases. 
+C++ introduce the concept of reference, which by design is _not null_*, that allows passing large objects with minimal cost. And returning objects by value benefits from the [NRVO](#name-return-value-optimization-nrvo) and [move semantics](#move-semantics) to allow minimal cost in many cases. 
 
 ### Smart pointers
 They essentially encapsulate all of the memory management, including the need to call delete at all.
 
 #### RAII (Resource acquisition is initialization)
-Is a very idiomatic concept in C++, takes advantage of the property of the stack to simplify the memory management of objects on the heap. 
+Is a very idiomatic concept in C++, that takes advantage of the property of the stack to simplify the memory management of objects on the heap. 
 
 The principle is simple: wrap a resource (pointer for instance) into an object, and dispose of the resources in its destructor. This is what smart pointers do:
-```
+
+```C++
 // This is just to grasp the concept of RAII. 
 // Is not the complete interface of a smart pointer.
 
@@ -665,18 +679,20 @@ private:
     T* p_;
 };
 ```
+
 You can manipulate *smart pointers* as objects allocated on the stack, and the compiler takes care of automatically calling the destructor when out of scope.
 
-Syntactically, a *smart pointers* behaves like a raw pointer, it can be dereferenced with operators `*` or `->` and you can test for nullity. The underlying pointer itself is accessible with a **.get()**.
+Syntactically, a *smart pointer* behaves like a raw pointer, it can be dereferenced with operators `*` or `->` and you can test for nullity. The underlying pointer itself is accessible with a **.get()**.
 
-One of the most important aspects is that the above interface doesn't deal with copy! A **SmartPointer** copied also copies the underlying pointer, so the following code has a bug:
-```
+One of the most important aspects is that the above interface doesn't deal with a copy! A **SmartPointer** copied also copies the underlying pointer, so the following code has a bug:
+```C++
 {
     SmartPointer<int> sp1(new int(42));
     SmartPointer<int> sp2 = sp1; // now both sp1 and sp2 point to the same object
 } // sp1 and sp2 are both destroyed, the pointer is deleted twice!
 ```
-How we deal with copy? Well, the various types of *smart pointers* differ in this. But this lets us express our intentions in code a lot better.
+
+How do we deal with a copy? Well, the various types of *smart pointers* differ in this. But this lets us express our intentions in code a lot better.
 
 The various types of pointers are there to **express a design** in the code. Here are the types of pointers sorted by decreasing order of usefulness (according to someone):
 - std::unique_ptr
@@ -694,6 +710,7 @@ This allows you to express your intentions in an interface. Consider the followi
 ```C++
 std::unique_ptr<House> buildAHouse();
 ```
+
 It gives you a pointer to a house, of which you are the owner. *No one else will delete this pointer*, except the unique_ptr returned from the function. 
 
 > NOTE: std::unique_ptr is the preferred pointer to return from a **factory** function.
@@ -705,7 +722,8 @@ Note though that even when you receive a unique_ptr, you're not guaranteed that 
 std::unique_ptr<const House> buildAHouse(); // for some reason, I don't want you
                                             // to modify the house you're being passed
 ```
-To ensure only one unique_ptr own a memory resource, std::unique_ptr cannot be copied. But the ownership can be transferred by moving a unique_ptr into another one.
+
+To ensure only one unique_ptr owns a memory resource, std::unique_ptr cannot be copied. But the ownership can be transferred by moving a unique_ptr into another one.
 
 ```C++
 std::unique_ptr<int> p1 = std::make_unique(42);
@@ -714,7 +732,7 @@ std::unique_ptr<int> p2 = move(p1); // now p2 hold the resource
 ```
 
 #### Raw pointers
-They share a lot with references, but the latter is preferred (except in some cases). The important thing to focus is that **raw pointers and references represent access to an object, but not ownership**. And this is the default way of passing objects to functions and methods.
+They share a lot with references, but the latter is preferred (except in some cases). The important thing to focus on is that **raw** pointers and references represent access to an object, but not ownership**. And this is the default way of passing objects to functions and methods.
 
 This is relevant when you hold an object with an unique_ptr and want to pass it to an interface. You don't pass the unique_ptr, nor a reference to it, but a reference to the pointed object.
 
@@ -726,20 +744,20 @@ renderHouse(*house);
 #### std::shared_ptr
 A single memory resource can be held by several std::shared_ptr at the same time. Internally maintains a count of how many of them are holding the same resource and when the last one is destroyed, it deletes the memory resource. Therefore allows copies, but with a reference-counting mechanism. 
 
-They should not be used by the default, because having several simultaneous holders of a resource:
+They should not be used by default, because having several simultaneous holders of a resource:
 - Makes for a more complex system.
-- Makes thread-safety harder.
-- Makes the code counter-intuitive when an object is not shared in therms of domain.
-- Can incur in performance costs, both memory and time.
+- Makes thread safety harder.
+- Makes the code counter-intuitive when an object is not shared in terms of the domain.
+- Can produce performance costs, both memory and time.
 
 One good case for using it is when objects are **shared in the domain**. 
 
 ![Shared_ptr](./Resources/Notes_about_C++/Shared_ptr.jpg)
 
 #### std::weak_ptr
-Can hold a reference to a shared object, but they don't increment the reference count. If no std::shared_ptr are holding an object, it will be deleted even if some weak pointers still point to it.
+Can hold a reference to a shared object, but they don't increment the reference count. If no std::shared_ptr is holding an object, it will be deleted even if some weak pointers still point to it.
 
-For this reason, weak_ptr need to check if an object is still alive. For this it has to be copied into a shared_ptr:
+For this reason, weak_ptr needs to check if an object is still alive. For this it has to be copied into a shared_ptr:
 
 ```C++
 void useMyWeakPointer(std::weak_ptr<int> wp)
@@ -768,13 +786,14 @@ std::shared_ptr<House> house2 = std::make_shared<House>();;
 house1->neighbour = house2;
 house2->neighbour = house1;
 ```
+
 None of the houses ends up being destroyed at the end of this code, because the shared_ptrs points into one another. But if one is a weak_ptr instead, there is no longer a circular reference.
 
 #### boost::scoped_ptr
-It disables the copy and even the move construction. It is the sole owner of a resource, and its ownership cannot be transferred. Therefore, a scoped_ptr can only live inside a scope or as a data member of an object.
+It disables the copy and even the move construction. It is the sole owner of a resource, and its owners cannot be transferred. Therefore, a scoped_ptr can only live inside a scope or as a data member of an object.
 
 #### std::auto_ptr
-Deprecated in C++11 and removed on C++17.
+Deprecated in C++11 and removed in C++17.
 
 # Optimizations
 
@@ -797,9 +816,9 @@ T T::operator++(int)              T T::operator--(int)    // the postfix form:
 ```
 
 ## Return Value Optimization (RVO)
-This happens when two conditions are meet: 
-- Caller allocates space on stack for return value, passes the address to callee.
-- Callee construct the result **directly** in that space.
+This happens when two conditions are met: 
+- The caller allocates space on the stack for the return value and passes the address to the callee.
+- The Callee constructs the result **directly** in that space.
 
 > NOTE: at the assembly level, the compiler always passes at least one parameter, this is the return address.
 
@@ -830,7 +849,8 @@ T f()
   return result;
 }
 ```
-But, like with the RVO, the function still needs to return a unique object (which is the case on the above example), so that the compiler can determine which object inside of `f` it has to construct at the memory location of t (outside of f).
+
+But, like with the RVO, the function still needs to return a unique object (which is the case in the above example), so that the compiler can determine which object inside of `f` it has to construct at the memory location of t (outside of f).
 
 For example, the NRVO can still be applied in the following case, because only one object (result) can be returned from the function.
 
@@ -846,16 +866,17 @@ T f()
   return result;
 }
 ```
+
 **FINAL NOTE**
 You can always try to facilitate RVO and NRVO by **returning only one object** from all the return paths of your functions, and by **limiting the complexity** in the structure of your functions.
 
 ## Clearer interfaces
 Sometimes we need to represent a value that is "empty", "null" or "not set" on the return of a function. There are many approaches to this:
 - **Return a special value**, like -1 where a positive integer is expected or "". 
-  - This is brittle because this values may actually be meaningful values, now or later, or be set by accident.
-- **Returning a boolean or an **error code** indicating whether the function has succeed and the result is passed through a function parameter.
-  - This is brittle and clumsy, because nothing enforces that the caller checks the return value and makes the surrounding code harder to write and read.
-- **Throwing an exception**. This is good but not always usable, because surrounding code has then to be exception-safe.
+  - This is brittle because these values may actually be meaningful, now or later, or be set by accident.
+- **Returning a boolean or an **error code** indicating whether the function has succeeded and the result is passed through a function parameter.
+  - This is brittle and clumsy because nothing enforces that the caller checks the return value and makes the surrounding code harder to write and read.
+- **Throwing an exception**. This is good but not always usable because the surrounding code has then to be exception-safe.
 
 One alternative is the use of **optional<T>**.
 
@@ -895,7 +916,7 @@ int main()
     std::cout << "not set" << std::endl;
   }
 }
-```
+``` 
 
 # Standard Algorithms
 
