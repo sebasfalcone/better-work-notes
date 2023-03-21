@@ -922,3 +922,143 @@ int main()
 
 
 ## Move semantics
+
+# Interesting implementations
+
+## Defer
+When writing [RAII-compliant](#raii-resource-acquisition-is-initialization) code, you don’t have to worry about the de-allocation of the resource. Take for example `std::ifstream`, you’ve created an instance, and tried to read some data from the file and whether succeeded or failed miserably, you don’t have to do anything else! No need to close anything, no need to free anything, everything is handled for you!
+
+But, when programming in C or C++, many system APIs will hand you a resource, that you are then responsible for closing/deallocating/etc. Understandably, this, just like any other task we have to do manually, is easily forgotten, making it prone to bugs, leaks and whatnot.
+
+For example, this code block has a problem.
+```C++
+int update_startup_time() 
+{
+    unsigned startup;
+    int fd = open(".startup_time", O_RDWR);
+    if (fd < 0) 
+    {
+        fprintf(stderr, "open failed\n");
+        return -1;
+    }
+    
+    if (read_startup_time(fd, &startup) != 0) 
+    {
+        close(fd);
+        fprintf(stderr, "read current startup time failed\n");
+        return -1;
+    }
+    
+    fprintf(stdout, "last startup time was %u\n", startup);
+    
+    startup = get_startup_time();
+    if (write_startup_time(fd, startup) != 0) 
+    {
+        fprintf(stderr, "write current startup time failed\n");
+        return -1;
+    }
+    
+    close(fd);
+    return 0;
+}
+```
+
+If we manage to open the file, and then `read_current_startup()`, but then fail while trying to `write_current_startup()`, we will never close the `fd`. This is of course a resource leak, and may well result in exhausting all the file descriptors on a Linux system if it goes unnoticed for too long.
+
+```C++
+/*
+ * Copyright (c) 2020-present Daniel Trugman
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include <functional>
+
+#define var_defer__(x) defer__ ## x
+#define var_defer_(x) var_defer__(x)
+
+#define ref_defer(ops) defer var_defer_(__COUNTER__)([&]{ ops; }) // Capture all by ref
+#define val_defer(ops) defer var_defer_(__COUNTER__)([=]{ ops; }) // Capture all by val
+#define none_defer(ops) defer var_defer_(__COUNTER__)([ ]{ ops; }) // Capture nothing
+
+class defer
+{
+public:
+    using action = std::function<void(void)>;
+
+public:
+    defer(const action& act)
+        : _action(act) {}
+    defer(action&& act)
+        : _action(std::move(act)) {}
+
+    defer(const defer& act) = delete;
+    defer& operator=(const defer& act) = delete;
+
+    defer(defer&& act) = delete;
+    defer& operator=(defer&& act) = delete;
+
+    ~defer()
+    {
+        _action();
+    }
+
+private:
+    action _action;
+};
+```
+
+The implementation is rather simple. It uses a lambda expression to create a function object that is executed once the object goes out of scope. And by taking advantage of lambda’s capture group, we can use the local members inside the cleanup function.
+
+And how will that look with our original example? As beautiful as it gets:
+
+```C++
+
+int update_startup_time() 
+{
+    unsigned startup;
+    int fd = open(".startup_time", O_RDWR);
+    if (fd < 0) 
+    {
+        fprintf(stderr, "open failed\n");
+        return -1;
+    }
+    
+    defer close_fd([fd]{ close(fd); });
+    
+    if (read_startup_time(fd, &startup) != 0) 
+    {
+        fprintf(stderr, "read current startup time failed\n");
+        return -1;
+    }
+    
+    fprintf(stdout, "last startup time was %u\n", startup);
+    
+    startup = get_startup_time();
+    if (write_startup_time(fd, startup) != 0) 
+    {
+        fprintf(stderr, "write current startup time failed\n");
+        return -1;
+    }
+    
+    return 0;
+}
+```
+
+> Reference: https://gist.github.com/dtrugman/d3b10ad0a91b2f069f07f9311d24932a
