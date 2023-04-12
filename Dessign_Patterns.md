@@ -25,7 +25,7 @@ ___
   - [Code reuse](#code-reuse)
 - [Design patterns](#design-patterns-1)
   - [What's a Design Pattern?](#whats-a-design-pattern)
-  - [What does the patter consist of?](#what-does-the-patter-consist-of)
+  - [What does the pattern consist of?](#what-does-the-pattern-consist-of)
   - [Classification of patterns](#classification-of-patterns)
 - [Design principles](#design-principles)
   - [Encapsulate what varies](#encapsulate-what-varies)
@@ -51,6 +51,7 @@ ___
   - [Creational Design patterns](#creational-design-patterns)
   - [Structural design patterns](#structural-design-patterns)
   - [Behavioral design patterns](#behavioral-design-patterns)
+
 # Design patterns
 
 # Object Oriented Programming - OOP
@@ -68,20 +69,16 @@ ___
 ![UML_example](./Resources/UML_example.jpg)
 
 - You have a cat named Oscar. Oscar is an object, an instance of the **cat** class.
->
 - Every cat has standard attributes: name, sex, age, weight, etc. These are the **class's fields**.
 - All cats behave similarly, they: sleep, eat, run, etc. These are the **class's methods**.
 - Collectively, fields and methods can be referenced as the **members** of their class.
->
-- Data stores inside the object's fields is often referenced as **state**, and all the object's methods define its **behavior**.
+- Data stored inside the object's fields are often referenced as **state**, and all the object's methods define its **behavior**.
 
 ## Class hierarchies
-- In a program we usually have more than one class. Some of these classes might be organized into **class hierarchies**.
-- Now imagine a **Dog class**, turns out that dogs and cats have a lot in common: name, sex, age, etc. Dogs can sleep, eat and run, same as cats. So we can define the base **Animal class** that would list all the common attributes and behaviors. 
->
-- A parent class is called **super-class** and its children are **sub-classes**. 
+- In a program, we usually have more than one class. Some of these classes might be organized into **class hierarchies**.
+- Now imagine a **Dog class**, turns out that dogs and cats have a lot in common: name, sex, age, etc. Dogs can sleep, eat and run, the same as cats. So we can define the base **Animal class** that would list all the common attributes and behaviors. 
+- A parent class is called a **super-class** and its children are **sub-classes**. 
 - Sub-classes inherit state and behavior from their parent, defining only attributes or behaviors that differ.
->
 - In this example, the **cat class** would have the **meow method** and the **dog class** the **bark method**. 
 
 ![Hierarchy](./Resources/Hierarchy_cat_dog.jpg )
@@ -94,30 +91,30 @@ ___
 - A subclass can either completely replace the default behavior or just enhance it with some extra stuff.
 
 ## Pillars of OOP
-- Object oriented programming is based on four pillars:
+- Object-oriented programming is based on four pillars:
 
 ### Abstraction
 - Objects *model* attributes and behaviors of real objects in a specific context. For example, an **Airplane Class** could exist in a flight simulator and a flight booking application. But what they model is very different:
 
 ![Abstraction](./Resources/Abstraction.jpeg)
 
-- **Abstraction** is a model of a real-world object or phenomenon, limited to a specific context, in which represents all details relevant to this context with high accuracy and omits all the rest.
+- **Abstraction** is a model of a real-world object or phenomenon, limited to a specific context, which represents all details relevant to this context with high accuracy and omits all the rest.
 
 ### Encapsulation
-- To start a car engine, you only need to turn a key or press a button. You've also have a steering wheel, a gear knob and some pedals. This illustrates how each object has an **interface** or in other words, a public part of an object open to interactions with other objects.
-- *Encapsulation* is the ability of and object to hide parts of its state and behaviors from other objects. 
+- To start a car engine, you only need to turn a key or press a button. You also have a steering wheel, a gear knob and some pedals. This illustrates how each object has an **interface** or in other words, a public part of an object open to interactions with other objects.
+- *Encapsulation* is the ability of an object to hide parts of its state and behaviors from other objects.
 
-- *Encapsulate* something means to make it **private**, in other words accessible only from within the methods of its own class. There is a less restrictive mode called **protected** that makes a member of a class available to sub-classes as well.
+- *Encapsulate* something means to make it **private**, in other words, accessible only from within the methods of its class. There is a less restrictive mode called **protected** that makes a member of a class available to sub-classes as well.
 
-- Interfaces and abstract classes / methods are based on concepts of abstraction and encapsulation.
+- Interfaces and abstract classes/methods are based on concepts of abstraction and encapsulation.
 
 #### C++ example
 
 - An interface describes the behavior or capabilities of a C++ class without committing to a particular implementation of that class. In C++, interfaces are implemented using abstract classes.
 
-- A class is made abstract by declaring at least one of its functions as pure virtual function. A pure virtual function is specified by placing "= 0":
+- A class is made abstract by declaring at least one of its functions as a pure virtual function. A pure virtual function is specified by placing "= 0":
 
-```
+```C++
 // Base class
 class Shape {
    public:
@@ -137,13 +134,14 @@ class Shape {
       int height;
 };
 ```
-- The purpose of an **abstract class** (often referred to as an ABC) is to provide an appropriate base class from which other classes can inherit. Abstract classes cannot be used to instantiate objects and serves only as an **interface**. Attempting to instantiate an object of an abstract class causes a compilation error.
+
+- The purpose of an **abstract class** (often referred to as an ABC) is to provide an appropriate base class from which other classes can inherit. Abstract classes cannot be used to instantiate objects and serve only as an **interface**. Attempting to instantiate an object of an abstract class causes a compilation error.
 
 - Thus, if a subclass of an ABC needs to be instantiated, it has to implement each of the virtual functions, which means that it supports the interface declared by the ABC. Failure to override a pure virtual function in a derived class, then attempting to instantiate objects of that class, is a compilation error.
 
 - Classes that can be used to instantiate objects are called **concrete classes**. Here is a continuation of the code above:
 
-```
+```C++
 // Derived classes
 class Rectangle: public Shape {
    public:
@@ -165,21 +163,22 @@ class Rectangle: public Shape {
 ### Inheritance
 - Is the ability to build new classes on top of existing ones. If you want to create a class that's slightly different from an existing one, you can extend the existing class and put extra functionality into a resulting subclass, which inherits fields and methods of the super-class (this avoids duplicating code).
 
-- As a consequence you have the same interface as their parent class. 
-  - You can't hide a method in a subclass if it was declared in the super-class. 
-  - Also, you must implement all abstract methods, even if they don't make sense for tour subclass.
+- As a consequence, you have the same interface as their parent class. 
+  - You can't hide a method in a subclass if it was declared in the superclass. 
+  - Also, you must implement all abstract methods, even if they don't make sense for your subclass.
 
 ![Inheritance](./Resources/Inheritance.jpeg)
 
 ### Polymorphism
 - Most **animals** can make sounds. We can anticipate that all sub-classes will need to override the base **makeSound** method so each subclass can emit the correct sound.
-- So we can declare it *abstract*, this let us omit any default implementation of the method in the super-class, but force all sub-classes to come up with their own.
+- So we can declare it *abstract, this lets us omit any default implementation of the method in the super-class, but force all sub-classes to come up with their own.
 
 ![Polymorphism](./Resources/Polymorphism.jpeg)
 
 - Imagine the following scenario:
   - You have a bag with several cats and dogs, and after taking one out you don't know for sure what it is. But when it makes a sound, the animal emits a specific sound depending on its concrete class.
-```
+
+```C++
 // Base class
 class Animal 
 {
@@ -218,7 +217,8 @@ int main(void)
     return 0;
 }
 ```
-```
+
+```Bash
 Output:
 Woof!
 Meow!
@@ -231,7 +231,7 @@ Meow!
 - *Polymorphism* is the ability of a program to detect the real class of an object and call its implementation, even when its real type is unknown in the current context.
 
 ## Relations Between objects
-In addition to *inheritance* and *implementation* there are other types of relations between objects. 
+In addition to *inheritance* and *implementation*, there are other types of relations between objects. 
 
 ### Dependency
 ![Dependency](./Resources/Dependency.jpeg)
@@ -243,11 +243,11 @@ In addition to *inheritance* and *implementation* there are other types of relat
 
 ### Association
 ![Association](./Resources/Association.jpeg)
-- Is a relationship in which one objects uses or interacts with another. Is a specialized kind of dependency, where an object always has access to the objects with which interacts, whereas simple dependency doesn't establish a permanent link.
+- Is a relationship in which one object uses or interacts with another. Is a specialized kind of dependency, where an object always has access to the objects with which interacts, whereas simple dependency doesn't establish a permanent link.
 
-- Lets look a combined example to understand the differences between *association* and *dependency*. \
-Imagine we have a `Professor` class:
-```
+- Let's look at a combined example to understand the differences between *association* and *dependency*. Imagine we have a `Professor` class:
+
+```C++
 #include <iostream>
 #include <random>
 #define MAX_GRADE 10
@@ -307,16 +307,17 @@ int main()
     professor.teach(spanish);
 }
 ```
-```
+
+```Bash
 output:
 You've got a 8 on Mathematics
 You've got a 6 on Geography
 You've got a 8 on Spanish
 ```
 
-- Look at the `teach` method. It takes `Course` class as an argument, which then is used in the body of the method. If someone changes the `test` method of the `Course` class (alters its name, adds required parameters, etc), our code will break. This is called a dependency.
+- Look at the `teach` method. It takes `Course` class as an argument, which then is used in the body of the method. If someone changes the `test` method of the `Course` class (alters its name, adds required parameters, etc), our code will break. This is called dependency.
 
-- Look at the `student` field and how it's used in the `teach` method. We can say that `Student` class is a dependency for professor. If `takeTest` changes, the professor's code will break. However, the `student` field is always accessible to any method of the `Professor`, the `Student` class is not just a dependency but also an association.
+- Look at the `student` field and how it's used in the `teach` method. We can say that `Student` class is dependent on the `Professor` class. If `takeTest` changes, the professor's code will break. However, the `student` field is always accessible to any method of the `Professor`, the `Student` class is not just a dependency but also an association.
 
 ### Aggregation
 ![Aggregation](./Resources/Aggregation.jpeg)
@@ -325,25 +326,25 @@ You've got a 8 on Spanish
 
 ### Composition
 ![Composition](./Resources/Composition.jpeg)
-- Is a specific kind of aggregation, whereas object is composed of one or more instances of the other. The distinction between this and other relations is that the component can only exist as part of the container.
+- Is a specific kind of aggregation, whereas an object is composed of one or more instances of the other. The distinction between this and other relations is that the component can only exist as part of the container.
 
 ## Summary
 - **Dependency**: Class А can be affected by changes in class B.
 - **Association**: Object А knows about object B. Class A depends
 on B.
-- **Aggregation**: Object А knows about object B, and consists of B.
+- **Aggregation**: Object А knows about object B and consists of B.
 Class A depends on B.
 - **Composition**: Object А knows about object B, consists of B, and
 manages B's life cycle. Class A depends on B.
 B. Objects A can be treated as B. Class A depends on B.
-- **Inheritance**: Class А inherits interface and implementation of
+- **Inheritance**: Class А inherits the interface and implementation of
 class B but can extend it. Objects A can be treated as B. Class
 A depends on B
 
 ![Relations_summary](./Resources/Relations_summary.jpeg)
 
 # Software design principles
-Before going deep on design patterns, lets discuss the process of designing software architecture.
+Before going deep into design patterns, let's discuss the process of designing software architecture.
 
 ## Code reuse
 Is one of the most common ways to reduce development costs. 
@@ -352,10 +353,10 @@ Making existing code work in a new context usually takes extra effort. You shoul
 
 Three levels of reuse:
 - **Lowest level**: Classes
-   - You reuse libraries, container and maybe some class "teams" like container/iterator.
+   - You reuse libraries, containers and maybe some class "teams" like iterators.
 
 - **Middle level**: Patterns
-   - Smaller and more abstract that frameworks. They're a description about how a couple of classes can relate to and interact with each other.
+   - Smaller and more abstract than frameworks. They're a description of how a couple of classes can relate to and interact with each other.
 
 - **High level**: Frameworks
    - They identify the key abstractions for solving a problem, represent them by classes and define relationships between them. 
@@ -367,12 +368,12 @@ What is good about the middle layer is that offers reuse but less risk. Building
 # Design patterns
 
 ## What's a Design Pattern?
-Are solutions to commonly occurring problems in software design. They are like pre-made blueprints that you can customize to solve a recurring design problem in your code.
+These are solutions to commonly occurring problems in software design. They are like pre-made blueprints that you can customize to solve a recurring design problem in your code.
 
-The pattern is not an specific piece of code, but a general concept. You can follow the pattern details and implement a solution that suits the realities of your own program.
+The pattern is not a specific piece of code, but a general concept. You can follow the pattern details and implement a solution that suits the realities of your program.
 
-## What does the patter consist of?
-- **Intent** of the patter briefly describes both the problem and the solution.
+## What does the pattern consist of?
+- **Intent** of the pattern briefly describes both the problem and the solution.
 - **Motivation** further explains the problem and the solution the pattern makes possible.
 - **Structure** of classes shows each part of the pattern and how they are related.
 - **Code example** in one or more programming languages.
@@ -384,9 +385,9 @@ Design patterns differ by their complexity, level of detail and scale of applica
 
 - The most universal and high-level patterns are called *architectural patterns*. These patterns can implement these patterns in virtually any language.
 
-We can divide patterns in three groups:
+We can divide patterns into three groups:
 - **Creational patterns** provide object creation mechanisms that increase flexibility and reuse of existing code.
-- **Structural patterns** explain how to assemble objects and classes into larger structures, while keeping the structures flexible and efficient.
+- **Structural patterns** explain how to assemble objects and classes into larger structures while keeping the structures flexible and efficient.
 - **Behavioral patterns** take care of effective communication and the assignment of responsibilities between objects.
 
 # Design principles
@@ -398,11 +399,11 @@ We can divide patterns in three groups:
 The goal of this principle is to minimize the effect caused by changes. You can isolate parts of the program that vary in independent modules, protecting the rest of the code from adverse effects.
 
 ### Encapsulation on a method level
-Imagine you're making an e-commerce website. And you implement a `getOrderTotal` method that calculates a grand total for the order, including taxes.
+Imagine you're making an e-commerce website. And you implement a `getOrderTotal` method that calculates a total for the order, including taxes.
 
-We can anticipate that tax-related code might need to change in the future. Overtime, the actual formula for tax calculation may change due to new laws or regulations. As a result, you'll need to change the `getOrderTotal` method quite often. But even the method's name suggests that it doesn't care about *how* taxes are calculated:
+We can anticipate that tax-related codes might need to change in the future. Over time, the actual formula for tax calculation may change due to new laws or regulations. As a result, you'll need to change the `getOrderTotal` method quite often. But even the method's name suggests that it doesn't care about *how* taxes are calculated:
 
-```
+```C++
 class Commerce 
 {
     public:
@@ -430,8 +431,10 @@ class Commerce
 
 // Tax calculation is mixed with the rest of the method's code
 ```
-You can extract the tax calculation logic into a separated method, hiding it from the original one:
-```
+
+You can extract the tax calculation logic into a separate method, hiding it from the original one:
+
+```C++
 class Commerce 
 {
     public:
@@ -465,15 +468,15 @@ class Commerce
 ```
 > NOTE: see that we respect the [ROV](https://shaharmike.com/cpp/rvo/)
 
-Tax-related changes become isolated inside a single method. Moreover, if the tax calculation logic becomes too complicated, it's now easier to move it to a separated class.
+Tax-related changes become isolated inside a single method. Moreover, if the tax calculation logic becomes too complicated, it's now easier to move it to a separate class.
 
 ### Encapsulation on a class level
-Over time you add more and more responsibilities to a method which used to do a simple thing. And this added behaviors eventually blur the primary responsibility of the containing class. Extracting everything to a new class might make things much more clear and simple.
+Over time you add more and more responsibilities to a method that is used to do a simple thing. And these added behaviors eventually blur the primary responsibility of the containing class. Extracting everything to a new class might make things much more clear and simple.
 
 ![Encapsulation_class_level](./Resources/Encapsulation_class_level.jpeg)
 
 ## Program to an interface, not an implementation
-You can tell that the design is flexible enough if you can easily extend it without breaking any existing code. A `Cat` that can eat any food is more flexible that one that can eat just sausages.
+You can tell that the design is flexible enough if you can easily extend it without breaking any existing code. A `Cat` that can eat any food is more flexible than one that can eat just sausages.
 
 When you want to make two classes collaborate, you can start by making one of them dependent on the other, but a more flexible way is to set up collaboration between objects:
 1. Determine what exactly one object needs from the other (Which methods does it execute?).
@@ -483,7 +486,7 @@ When you want to make two classes collaborate, you can start by making one of th
 
 ![Interface_not_implementation_principle](./Resources/Interface_not_implementation/Principle.jpeg)
 
-At first glance it seems that you only created a more complicated code, but when you or someone wants do add more functionality, this will come in handy.
+At first glance, it seems that you only created a more complicated code, but when you or someone wants to add more functionality, this will come in handy.
 
 ### Example
 Say you created a *software development company simulator*. You have different classes that represent various employee types:
@@ -496,7 +499,7 @@ Also, we can apply polymorphism inside the `Company` class, treating various emp
 
 ![Interface_not_implementation_polymorphism](./Resources/Interface_not_implementation/Polymorphism.jpeg)
 
-The `Company` class remains coupled to the employee classes. This is bad, if we introduce new types of companies that work with other types of employees, we'll need to override most of the `Company` class instead of reusing code.
+The `Company` class remains coupled with the employee classes. This is bad, if we introduce new types of companies that work with other types of employees, we'll need to override most of the `Company` class instead of reusing code.
 
 To solve this problem, we declare the method for getting employees as *abstract*. Each company will implement this method differently, creating only those employees that it needs.
 ![Interface_not_implementation_factory_method](./Resources/Interface_not_implementation/Factory_method.jpeg)
@@ -508,9 +511,9 @@ Now, the `Company` class become independent from various employee classes and ca
 ## Composition over inheritance
 Inheritance is the most obvious and easy way of reusing code between classes. You have two classes with the same code, create a common base class for those two and move the similar code into it.
 
-Unfortunately, inheritance comes with caveats that become apparent when you program has tons of classes:
+Unfortunately, the inheritance comes with caveats that become apparent when your program has tons of classes:
 
-- **A subclass can't reduce the interface of a supper-class**:
+- **A subclass can't reduce the interface of a superclass**:
    - You have yo implement all abstract methods of the parent class, even if you won't use them.
 - **When overriding methods you need to make sure that the new behavior is compatible with the base one**:
    - Objects of the subclass may be passed to any code that expects objects of the super-class and you don't want that code to break.
@@ -522,8 +525,8 @@ Unfortunately, inheritance comes with caveats that become apparent when you prog
    - Inheritance usually takes place in a single dimension. But when there are two or more dimensions, you have to create lots of class combinations, bloating the class hierarchy.
 
 An alternative to *inheritance* is *composition*.
-   - Inheritance represent the "is a" of a relationship (a car *is a* transport).
-   - Composition represent the "has a" of a relationship (a car *has an* engine).
+   - Inheritance represents the "is a" of a relationship (a car *is a* transport).
+   - Composition represents the "has a" of a relationship (a car *has an* engine).
 
 > NOTE: this principle also applies to aggregation.
 
@@ -532,9 +535,9 @@ You need to create a catalog app for a car manufacturer. The company makes both 
 
 ![Composition_over_inheritance_inheritance](./Resources/Composition_over_inheritance/inheritance.jpeg)
 
-Each additional parameter results in multiplying the number of sub-classes. There's a lot of duplicated code between sub-classes, because you can't extend two classes at the same time.
+Each additional parameter results in multiplying the number of sub-classes. There's a lot of duplicated code between subclasses because you can't extend two classes at the same time.
 
-With composition, instead of a car objects implementing a behavior on their own, they can delegate it to other objects.
+With composition, instead of car objects implementing a behavior on their own, they can delegate it to other objects.
 
 The added benefit is that you can replace a behavior at runtime. You can replace an engine object linked to a car object just by assigning a different engine object to the car.
 
@@ -543,7 +546,7 @@ The added benefit is that you can replace a behavior at runtime. You can replace
 > NOTE: this structure of classes resembles the [Strategy pattern](https://refactoring.guru/design-patterns/strategy).
 
 ## SOLID principle
-As all things in life, don't take things as a dogma. This principles are not always respected, even in successful software products, but is good to think of them whenever you write code.
+As with all things in life, don't take things as dogma. These principles are not always respected, even in successful software products, but is good to think of them whenever you write code.
 
 SOLID is a mnemonic for five design principles, intended to make software design more understandable, flexible and maintainable.
 
@@ -552,14 +555,14 @@ SOLID is a mnemonic for five design principles, intended to make software design
 
 Try to make every class responsible for a single part of the functionality provided by the software, and make that responsibility entirely encapsulated (*hidden within*) by the class.
 
-If a class does too many things, you have to change it every time one of these things change. While doing this you are risking other parts of the class which you didn't intend to change.
+If a class does too many things, you have to change it every time one of these things changes. While doing this you are risking other parts of the class which you didn't intend to change.
 
 #### Example
-The `Employee` class has several reasons to change. One might be related to the main job of the class, that is *managing employee data*. Another reason is that the format of the *timeSheet* may change, requiring you to change the code withing the class.
+The `Employee` class has several reasons to change. One might be related to the main job of the class, which is _managing employee_ data*. Another reason is that the format of the *timeSheet* may change, requiring you to change the code within the class.
 
 ![Single_responsibility_principle_bad](./Resources/SOLID/Single_responsibility_principle_bad.jpeg)
 
-Solve the problem by moving the behavior related to printing time-sheet reports into a separated class.
+Solve the problem by moving the behavior related to printing time-sheet reports into a separate class.
 
 ![Single_responsibility_principle_good](./Resources/SOLID/Single_responsibility_principle_good.jpeg)
 
@@ -578,44 +581,44 @@ If a class is already developed, tested and reviewed, changing its code is risky
 
 #### Example
 
-You have an e-commerce app with an `Order` class that calculates shipping costs and all shipping methods are hardcoded inside the class. If you need to add a new shipping  method, you have to change the code of the `Order` class and risk breaking it.
+You have an e-commerce app with an `Order` class that calculates shipping costs and all shipping methods are hardcoded inside the class. If you need to add a new shipping method, you have to change the code of the `Order` class and risk breaking it.
 
 ![Open_closed_bad](./Resources/SOLID/Open_closed_bad.jpeg)
 
-You can solve the problem by applying the [*Strategy pattern*](https://refactoring.guru/design-patterns/strategy). Start by extracting shipping methods into separate classes with common interface.
+You can solve the problem by applying the [*Strategy pattern*](https://refactoring.guru/design-patterns/strategy). Start by extracting shipping methods into separate classes with a common interface.
 
 ![Open_closed_bad](./Resources/SOLID/Open_closed_good.jpeg)
 
-Now, when you implement a new shipping method, you can derive new class from the `Shipping` interface without touching any of the code in the `Order` class.
+Now, when you implement a new shipping method, you can derive a new class from the `Shipping` interface without touching any of the code in the `Order` class.
 
-As a bonus, this solution let you move the delivery time calculation to more relevant classes, according to the [*single responsibility principle*](#single-responsibility-principle).
+As a bonus, this solution lets you move the delivery time calculation to more relevant classes, according to the [*single responsibility principle*](#single-responsibility-principle).
 
 ### Liskow substitution principle
 > When extending a class, remember that you should be able to pass objects of the subclass in place of objects of the parent class without breaking the client code.
 
-This means that the subclass should remain compatible with the behavior of the super-class. When overriding a method, extend the base behavior instead of replacing it with something else.
+This means that the subclass should remain compatible with the behavior of the superclass. When overriding a method, extend the base behavior instead of replacing it with something else.
 
-This principle is a set of checks that help predict whether a subclass remains compatible with the code that was working with the super-class. This is critical when developing libraries and frameworks, because your classes are going to be used by other people whose code you can't directly access and change.
+This principle is a set of checks that help predict whether a subclass remains compatible with the code that was working with the superclass. This is critical when developing libraries and frameworks because your classes are going to be used by other people whose code you can't directly access and change.
 
 #### Checklist
 - Parameter types in a method of a subclass should *match* or be *more abstract* than parameter types in the method of the supper-class:
    - There's a class with a method that's supposed to feed cats `feed(Cat c)`. Client code always passes cat objects into this method.
       - **GOOD**: You create a subclass that overrode the method so that it can feed any animal (a supper-class of cats): `feed(Animal c)`. Now if you pass an object to the client code, everything would still work. The method can feed all animals, so it can still feed any cat passed by the client.
-      - **BAD**: You create another subclass and restricted the feeding method to only accept Bengal cats (a subclass if cats): `feed(BengalCat c)`. What will happen to the client code if oy link it with an object like this instead of with the original class? Since the method can only feed a specific breed of cats, it won't serve generic cats passed by the client, breaking all related functionality.
+      - **BAD**: You create another subclass and restricted the feeding method to only accept Bengal cats (a subclass of cats): `feed(BengalCat c)`. What will happen to the client code if oy link it with an object like this instead of with the original class? Since the method can only feed a specific breed of cats, it won't serve generic cats passed by the client, breaking all related functionality.
 
 - The return type in a method of a subclass should *match* or be a *sub-type* of the return type in the method of the super-class (requirements for a return type are inverse of requirements for parameter types):
-   - You have a class with a method `Cat butCat();`. The client code expects to receive any cat as result of executing this method.
-      - **GOOD**: A subclass overrides the method as follows: `BengalCat buyCat();`. The client gets a Bengal cat, which still is a cat, so everything okay.
+   - You have a class with a method `Cat butCat();`. The client code expects to receive any cat as a result of executing this method.
+      - **GOOD**: A subclass overrides the method as follows: `BengalCat buyCat();`. The client gets a Bengal cat, which still is a cat, so everything is okay.
       - **BAD**: A subclass overrides the method as follows: `Animal butCat();`. Now the client code breaks since it receives an unknown generic animal, that doesn't for a structure designed for a cat.
 
-- A method in a subclass shouldn't throw types of exceptions which the base method isn't expected to throw:
+- A method in a subclass shouldn't throw types of exceptions that the base method isn't expected to throw:
     - Types of exceptions should *match* or be *sub-types* of the ones that the base method is already able to throw. This is because `try-catch` blocks in the client code target specific types and unexpected types might slip throw the defensive lines of the client code and crash the application.
 
 - A subclass shouldn't strengthen pre-conditions:
     - If the base method has a parameter with type `int`. If a subclass limits the value of the argument to just positive numbers (by throwing an exception), then the client code, which used to work fine when passing negative numbers into the method, now breaks if starts working with an object of this subclass.
 
 - A subclass shouldn't weaken post-conditions:
-    - You have a class with a method that works with a DB. A method of the class is supposed to always close all opened DB connections upon return a value.
+    - You have a class with a method that works with a DB. A method of the class is supposed to always close all opened DB connections upon returning a value.
     - If you create a subclass that leaves open the connection to reuse it. But the client might now know about that and terminate the program without cleanly closing it, leaving behind ghost DB connections.
 
 #### Example
@@ -623,20 +626,20 @@ Here is a hierarchy of document classes that violates the substitution principle
 
 ![Liskov_substitution_principle_bad](./Resources/SOLID/Liskov_substitution_principle_bad.jpeg)
 
-The `save` method in the `ReadOnlyDocument` subclass thrown an exception if someone tries to call it. The base method doesn't have this restriction. This means that the client code will break if we don't check the document type before saving it. 
+The `save` method in the `ReadOnlyDocument` subclass throws an exception if someone tries to call it. The base method doesn't have this restriction. This means that the client code will break if we don't check the document type before saving it. 
 
 The resulting code also violates the open/closed principle, since the code becomes dependent on concrete classes of documents. If you introduce a new document subclass, you'll need to change the client code to support it.
 
 ![Liskov_substitution_principle_good](./Resources/SOLID/Liskov_substitution_principle_good.jpeg)
 
-You can solve the problem by redesigning the class hierarchy. A subclass should extend the behavior of a super-class, therefore the read-only document becomes the base class of the hierarchy. The writable document is now a subclass which extends the base class and adds the saving behavior.
+You can solve the problem by redesigning the class hierarchy. A subclass should extend the behavior of a super-class, therefore the read-only document becomes the base class of the hierarchy. The writable document is now a subclass that extends the base class and adds the saving behavior.
 
 ### Interface segregation principle
 > Clients shouldn't be forced to depend on methods they do not use.
 
-Try to make your interfaces narrow enough that client  classes don't have to implement behaviors they don't need.
+Try to make your interfaces narrow enough that client classes don't have to implement behaviors they don't need.
 
-You should break down "fat" interfaces into more granular and specific ones. Clients should only implement methods that they really need. Class inheritance lets a class have just one super-class, but it doesn't limit the number of interfaces that the class can implement, so there is no need to add lots of unrelated methods to a single interface (break them down into more refined interfaces, you can implement them all in a single class if needed).
+You should break down "fat" interfaces into more granular and specific ones. Clients should only implement methods that they need. Class inheritance lets a class have just one super-class, but it doesn't limit the number of interfaces that the class can implement, so there is no need to add lots of unrelated methods to a single interface (break them down into more refined interfaces, you can implement them all in a single class if needed).
 
 #### Example
 You create a library that makes it easy to integrate apps with various cloud computing providers. While the initial version only supported AWS, it covered the full set of cloud services and features.
@@ -645,7 +648,7 @@ You assumed all cloud providers have the same spectrum of features as AWS, but i
 
 ![Interface_segregation_principle_bad](./Resources/SOLID/Interface_segregation_principle_bad.jpeg)
 
-You can implement these methods and put nullify some methods, but its not elegant. The better approach is to break down the interface into parts. Classes that are able to implement the original interface can just implement several refined interfaces. Other classes can implement only those interfaces which have methods that make sense for them:
+You can implement these methods and put nullify some methods, but it's not elegant. The better approach is to break down the interface into parts. Classes that can implement the original interface can just implement several refined interfaces. Other classes can implement only those interfaces which have methods that make sense for them:
 
 ![Interface_segregation_principle_good](./Resources/SOLID/Interface_segregation_principle_good.jpeg)
 
@@ -655,12 +658,12 @@ Remember (as with the other principles) don't go too far. More interfaces mean m
 > High-level classes shouldn't depend on low-level classes. Both should depend on abstraction. Abstraction shouldn't depend on details. Details should depend on abstraction.
 
 When designing software, you can make a distinction between two levels of classes:
-- **Low-level classes**: implement basic operations such as working with a disk, transferring data over a network, connection to a DB, etc.
-- **High-level classes**: Contain complex business logic that directs low-level classes to do something.
+- **Low-level classes**: Implements basic operations such as working with a disk, transferring data over a network, connections to a DB, etc.
+- **High-level classes**: Contains complex business logic that directs low-level classes to do something.
 
 Sometimes you design low-level classes first and then start on the high-level ones. This is common when you start to develop a prototype and you're not sure what's possible at the higher level because low-level stuff isn't yet implemented or clear. With this approach, business logic classes tend to become dependent on primitive low-level classes.
 
-This principle suggest changing the direction of this dependency:
+This principle suggests changing the direction of this dependency:
 1. Describe the **interface** for low-level operations that high-level classes rely on, preferably in business terms. 
     - Example: The business logic should call a method `openReport(file)` rather than a series of methods `openFile(x)`, `readBytes(n)`, `closeFile(x)`. These interfaces count as high-level ones.
 2. Make the high-level classes dependent on those interfaces, instead of on concrete low-level classes.
@@ -677,7 +680,7 @@ You can fix this problem by creating a high-level interface that describes read/
 
 ![Dependency_inversion_principle_good](./Resources/SOLID/Dependency_inversion_principle_good.jpeg)
 
-The direction of the original dependency has been inverted: low-level classes are now depended on the high-level abstraction.
+The direction of the original dependency has been inverted: low-level classes are now dependent on the high-level abstraction.
 
 # Catalog of design patterns
 For this part the summary will contain the following:
@@ -689,62 +692,61 @@ For this part the summary will contain the following:
 - Relation with other patterns.
 
 ## Creational Design patterns
-They provide various object creation mechanism which increase flexibility and reuse of existing code.
+They provide various object creation mechanisms which increase flexibility and reuse of existing code.
 
-- **[Factory method](https://refactoring.guru/design-patterns/factory-method/cpp/example)**: Provides an interface for creating objects in superclass, but allows sub-classes to alter the type of objects that will be created.
+- **[Factory method](https://refactoring.guru/design-patterns/factory-method/)**: Provides an interface for creating objects in the superclass but allows sub-classes to alter the type of objects that will be created.
 
-- **[Abstract factory](#abstract-factory)**:  Produce families of related objects without specifying their concrete classes.
+- **[Abstract factory](#https://refactoring.guru/design-patterns/abstract-factory/)**:  Produce families of related objects without specifying their concrete classes.
 
-- **[Builder](#builder)**: Construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
+- **[Builder](#https://refactoring.guru/design-patterns/builder/)**: Construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
 
-- **[Prototype](#prototype)**: Lets you copy existing objects without making your code dependent on their classes.
+- **[Prototype](#https://refactoring.guru/design-patterns/prototype/)**: Lets you copy existing objects without making your code dependent on their classes.
 
-- **[Singleton](https://refactoring.guru/design-patterns/singleton/cpp/example)**: Lets you ensure that a class has only one instance, while providing a global access point to the instance.
+- **[Singleton](https://refactoring.guru/design-patterns/singleton/)**: Lets you ensure that a class has only one instance while providing a global access point to the instance.
 
 ## Structural design patterns
 Structural design patterns explain how to assemble objects
-and classes into larger structures, while keeping these structures flexible and efficient.
+and classes into larger structures while keeping these structures flexible and efficient.
 
-- **[Adapter](https://refactoring.guru/design-patterns/adapter/cpp/example)**: Allows objects with incompatible interfaces to collaborate.
+- **[Adapter](https://refactoring.guru/design-patterns/adapter/)**: Allows objects with incompatible interfaces to collaborate.
 
-- **[Bridge](https://refactoring.guru/design-patterns/bridge/cpp/example)**: Lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation—which can be developed independently of each other.
+- **[Bridge](https://refactoring.guru/design-patterns/bridge/)**: Lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation—which can be developed independently of each other.
 
-- **[Composite](https://refactoring.guru/design-patterns/composite/cpp/example)**: Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
+- **[Composite](https://refactoring.guru/design-patterns/composite/)**: Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
 
-- **[Decorator](https://refactoring.guru/design-patterns/decorator/cpp/example)**: Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+- **[Decorator](https://refactoring.guru/design-patterns/decorator/)**: Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
 
-- **[Facade](https://refactoring.guru/design-patterns/facade/cpp/example)**: Provides a simplified interface to a library, a framework, or any other complex set of classes.
+- **[Facade](https://refactoring.guru/design-patterns/facade/)**: Provides a simplified interface to a library, a framework, or any other complex set of classes.
 
-- **[Flyweight](https://refactoring.guru/design-patterns/flyweight/cpp/example)**: Lets you fit more 
-objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object.
+- **[Flyweight](https://refactoring.guru/design-patterns/flyweight/)**: Lets you fit more objects into the available amount of RAM by sharing common parts of the state between multiple objects instead of keeping all of the data in each object.
 
-- **[Proxy](https://refactoring.guru/design-patterns/proxy/cpp/example)**: Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
+- **[Proxy](https://refactoring.guru/design-patterns/proxy/)**: Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
 
 ## Behavioral design patterns
 Behavioral design patterns are concerned with algorithms and
 the assignment of responsibilities between objects.
 
-- **[Chain of responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility/cpp/example)**: Lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
+- **[Chain of responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility/)**: Lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
 
-- **[Command](https://refactoring.guru/design-patterns/command/cpp/example)**: Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request's execution, and support undo-able operations.
+- **[Command](https://refactoring.guru/design-patterns/command/)**: Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as method arguments, delay or queue a request's execution, and support undo-able operations.
 
-- **[Iterator](https://refactoring.guru/design-patterns/iterator/cpp/example)**: Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
+- **[Iterator](https://refactoring.guru/design-patterns/iterator/)**: Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 
-- **[Mediator](https://refactoring.guru/design-patterns/mediator/cpp/example)**: Lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
+- **[Mediator](https://refactoring.guru/design-patterns/mediator/)**: Lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
 
-- **[Memento](https://refactoring.guru/design-patterns/memento/cpp/example)**: Lets you save and restore the previous state of an object without revealing the details of its implementation.
+- **[Memento](https://refactoring.guru/design-patterns/memento/)**: Lets you save and restore the previous state of an object without revealing the details of its implementation.
 
-- **[Observer](https://refactoring.guru/design-patterns/observer/cpp/example)**: Lets you define a subscription mechanism to notify multiple objects about any events that happen to the object 
+- **[Observer](https://refactoring.guru/design-patterns/observer/)**: Lets you define a subscription mechanism to notify multiple objects about any events that happen to the object 
 they're observing.
 
-- **[State](https://refactoring.guru/design-patterns/state/cpp/example)**: Lets an object alter its behavior when its internal state changes. It appears as if the object changed its class.
+- **[State](https://refactoring.guru/design-patterns/state/)**: Lets an object alters its behavior when its internal state changes. It appears as if the object changed its class.
 
-- **[Strategy](https://refactoring.guru/design-patterns/strategy/cpp/example)**: Lets you define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.
+- **[Strategy](https://refactoring.guru/design-patterns/strategy/)**: Lets you define a family of algorithms, put each of them into a separate class and make their objects interchangeable.
 
-- **[Template Method](https://refactoring.guru/design-patterns/template-method/cpp/example)**: Defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the 
+- **[Template Method](https://refactoring.guru/design-patterns/template-method/)**: Defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the 
 algorithm without changing its structure.
 
-- **[Visitor](https://refactoring.guru/design-patterns/visitor/cpp/example)**: Lets you separate algorithms from the objects on which they operate.
+- **[Visitor](https://refactoring.guru/design-patterns/visitor/)**: Lets you separate algorithms from the objects on which they operate.
 
 ___
-**Acknowledgement**: Most of this is bassed on the work of the [Refactoring Guru Team](https://refactoring.guru/).
+**Acknowledgement**: Most of this is based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
