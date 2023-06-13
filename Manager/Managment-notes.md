@@ -97,16 +97,16 @@ Turn this into action. Look back at that task list and also your calendar:
 Time to focus on the stretch each employee needs to excel:
 - Are they new to a role or the company? Be more directive.
 - Are they established and growing? Ask them how they would solve the problem.
-- Are they an expert? Challenge them to find new problems to solve and get out the way
+- Are they an expert? Challenge them to find new problems to solve and get out of the way
 
 #### Everyday practical tip
-Ask them how they would approach solving a problem, the steps they would take, and challenge them, using a coaching approach. Get them to work out how to solve problems by themselves. Check in at 20% and 80% completion.
+Ask them how they would approach solving a problem, and the steps they would take, and challenge them, using a coaching approach. Get them to work out how to solve problems by themselves. Check-in at 20% and 80% completion.
 
-#### Longer term practical tip
-Ask them how they want to grow (people usually know). And they'll feel agency over their own development. Challenge them to go out and find and take that work, but be there to support them. Virtuous cycle.
+#### Long-term practical tip
+Ask them how they want to grow (people usually know). And they'll feel agency over their development. Challenge them to go out and find and take that work, but be there to support them. Virtuous cycle.
 
 ### Set expectations with your team
-Good delegation is more than assigning tasks: **It's goal-oriented, it's written down, it's intentional.**
+Good delegation is more than assigning tasks: **It's goal-oriented, it's written down, and it's intentional.**
 
 ### Work on the mechanics
 You've already:
@@ -115,20 +115,48 @@ You've already:
 - Aligned on success, so they know what great looks like.
 
 Now, start climbing:
-- Steps over Tasks, ensure they can enunciate them.
-- Processes over Steps, how does this change our long term approach.
+- Steps over Tasks, and ensure they can enunciate them.
+- Processes over Steps, how does this change our long-term approach?
 - Responsibilities over Processes, level them up to take responsibility.
-- Goals over Responsibilities, ensure they have the context for the goals
+- Goals over responsibilities ensure they have the context for the goals
 - Outcomes over Goals, focus on the outcomes
 
 Each run is higher leverage!
 
-
 ### Watch out for: delegating and walking away
-You need to trust your team to do great work. But you also need to verify that it's been done, **and done well.** You also have to support their efforts. Clear metrics and surveys / feedback are a good starting point, as are quick and simple retrospectives. 
+You need to trust your team to do great work. But you also need to verify that it's been done, **and done well.** You also have to support their efforts. Clear metrics and surveys/feedback are a good starting point, as are quick and simple retrospectives. 
 
 Simple questions:
 - What would you do differently next time? Get them to explain.
 - What could I do to better support you when delegating? Get them to be frank.
 
-Checking in is not Micromanaging, that's different, that's your insecurity. Your job is to enable, motivate and assess the various paths. If they're being defensive when you keep asking for updates, that ones on you buddy!
+Checking in is not Micromanaging, that's different, that's your insecurity. Your job is to enable, motivate and assess the various paths. If they're being defensive when you keep asking for updates, those are on you buddy!
+
+## Engineering Manager's tools
+An EM has authority over how their team works and how they evaluate their team members. This authority means they have three primary tools for change:
+- **Systems** within the team to improve their work
+- Your **Behaviour** to influence others.  
+- **Rewards** to incentivize the correct behavior.
+
+### Systems
+Every team has multiple processes it follows, both formally and informally. Being a leader, the EM acts on these processes to improve their desired outcome.
+
+#### Tips
+
+- **Start from the problem, not the solution**. Your experience may bias your vision, is essential to understand if other people agree that a problem exists in the first place.
+- **Agree on a problem, and suggest solutions**. The manager must understand their role as a leader and help the team navigate towards solutions. "Consensus is not everyone agreeing. It is everyone feeling they have been heard and taken seriously". The EM's role is to listen to all perspectives and to move forward with a solution that considers them all.
+- **Think globally, act locally**. The EM must consider the whole system when deciding how to improve. Most tactics used in a team will depend on the team's context and other overlapping systems. Always understand the context and other overlapping systems.
+
+### Behavior
+Managers can influence a team's behavior with their most valuable commodity, **attention**. EMs will have their behavior observed by team members and can use their focus to signal how the team should work.
+
+It's subtle but can be used across many situations. For example, in a team meeting, the questions an EM asks will be consider significant. Likewise, in a project, the areas where the EM pays attention to will be noticed by team members. Some of these areas are:
+
+- **Technical improvements**: Testing, architecture, etc.
+- **Process improvements**: Code reviewing, metrics updating, etc. 
+- **Regular syncs**: Here the EM can drive the questions to a desired area.
+
+### Rewards
+It's always good to give feedback, not just to the team member itself but to technical leads about a team member's participation.
+
+As a manager, the more you can observe your team members and highlight small areas of improvement and success, the easier you will find it to improve how they work individually and, consequently, how the team works together. 
