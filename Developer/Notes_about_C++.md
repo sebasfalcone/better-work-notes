@@ -3,6 +3,8 @@
 - [Table of contents](#table-of-contents)
 - [Notes about C++](#notes-about-c)
   - [The stack and the heap](#the-stack-and-the-heap)
+  - [The static](#the-static)
+    - [Characteristics](#characteristics)
     - [The stack](#the-stack)
     - [The heap](#the-heap)
   - [Function pointers](#function-pointers)
@@ -59,6 +61,35 @@ C++ has several types of memories that correspond to different parts of the phys
 - The static
 - The stack
 - The heap
+
+## The static
+Region where objects with static storage duration are stored. Objects in this region have their lifetime managed by the runtime system and exist for the entire duration of the program.
+
+### Characteristics
+
+1. **Global Scope**: Variables declared outside of any function (global variables) are stored in the static region. These variables are accessible throughout the entire program.
+  ```C++
+  int globalVar = 10; // Stored in the static region
+  ```
+
+2. **Static Variables**: Variables declared with the static keyword within functions or classes also reside in the static region. These variables retain their value between function calls or across different instances of a class.
+  ```C++
+  void exampleFunction() {
+      static int counter = 0; // Stored in the static region
+      counter++;
+      std::cout << counter << "\n";
+  }
+  ```
+
+3. **Initialization**: Static variables are initialized only once, the first time control passes through their declaration. If not explicitly initialized, they are zero-initialized.
+  ```C++
+  static int uninitializedVar; // Zero-initialized to 0
+  static int initializedVar = 42; // Initialized to 42
+  ```
+
+4. **Lifetime**: The lifetime of static variables spans the entire execution of the program. They are created before the main function starts and destroyed after the main function ends.
+
+5. **Storage**: Static storage is not part of the stack or heap. It has a fixed location in memory that remains constant throughout the program's execution.
 
 ### The stack
 The default way to store objects in C++:
