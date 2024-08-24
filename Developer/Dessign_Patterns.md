@@ -1,4 +1,4 @@
-**Acknowledgement**: Most of this is based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
+**Acknowledgement**: This notes are based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
 ___
 
 # Table of contents
@@ -49,8 +49,30 @@ ___
       - [Example](#example-6)
 - [Catalog of design patterns](#catalog-of-design-patterns)
   - [Creational Design patterns](#creational-design-patterns)
+    - [Factory](#factory)
+    - [Abstract factory](#abstract-factory)
+    - [Builder](#builder)
+    - [Prototype](#prototype)
+    - [Singleton](#singleton)
   - [Structural design patterns](#structural-design-patterns)
+    - [Adapter](#adapter)
+    - [Bridge](#bridge)
+    - [Composite](#composite)
+    - [Decorator](#decorator)
+    - [Facade](#facade)
+    - [Flyweight](#flyweight)
+    - [Proxy](#proxy)
   - [Behavioral design patterns](#behavioral-design-patterns)
+    - [Chain of responsibility](#chain-of-responsibility)
+    - [Command](#command)
+    - [Iterator](#iterator)
+    - [Mediator](#mediator)
+    - [Memento](#memento)
+    - [Observer](#observer)
+    - [State](#state)
+    - [Strategy](#strategy)
+    - [Template Method](#template-method)
+    - [Visitor](#visitor)
 
 # Design patterns
 
@@ -694,59 +716,161 @@ For this part the summary will contain the following:
 ## Creational Design patterns
 They provide various object creation mechanisms which increase flexibility and reuse of existing code.
 
-- **[Factory method](https://refactoring.guru/design-patterns/factory-method/)**: Provides an interface for creating objects in the superclass but allows sub-classes to alter the type of objects that will be created.
+### [Factory](https://refactoring.guru/design-patterns/factory-method/)
+**Brief**: Provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created.
+**Structure**
+![Factory](./Resources/Design_patterns/Factory.png)
 
-- **[Abstract factory](#https://refactoring.guru/design-patterns/abstract-factory/)**:  Produce families of related objects without specifying their concrete classes.
+1. The **Product** is an interface, which is common to all objects produced.
+2. **Cocrete products** are different implementations of the product interface.
+3. The **Creator** declares the factory method that returns the new product object. The return type should match the product interface.
+4. **Concrete creators** overrides the base factory methods to return a specific type of product.
 
-- **[Builder](#https://refactoring.guru/design-patterns/builder/)**: Construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
+**Applicability**
+- You don't know the exact types and dependencies of the objects your code should work with.
+  - Decouples the creation of objects from the code that actually uses them. This makes easier to extend the codebase with new types of objects.
+- To provide users of your library or framework with a way to extend its internal components.
+  - Imagine a UI framework that lets you create different types of buttons. You can create a factory method for each type of button and let the client code create buttons without knowing the specific class.
+- To save system resources by reusing existing objects
 
-- **[Prototype](#https://refactoring.guru/design-patterns/prototype/)**: Lets you copy existing objects without making your code dependent on their classes.
+**Pros and cons**
+- ✅ Avoids tight coupling between the creator and the concrete products.
+- ✅ *Single responsibility principle*. You can move the product creation code into one place, making the code easier to maintain.
+- ✅ *Open/closed principle*. You can introduce new types of products without breaking the existing client code.
+- ❌ It may add complexity to the codebase by increasing the number of classes (subclasses needed to implement the pattern).
 
-- **[Singleton](https://refactoring.guru/design-patterns/singleton/)**: Lets you ensure that a class has only one instance while providing a global access point to the instance.
+### [Abstract factory](#https://refactoring.guru/design-patterns/abstract-factory/)
+Produce families of related objects without specifying their concrete classes.
+
+### [Builder](#https://refactoring.guru/design-patterns/builder/)
+Construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
+
+### [Prototype](#https://refactoring.guru/design-patterns/prototype/)
+Lets you copy existing objects without making your code dependent on their classes.
+
+### [Singleton](https://refactoring.guru/design-patterns/singleton/)
+Lets you ensure that a class has only one instance while providing a global access point to the instance.
 
 ## Structural design patterns
 Structural design patterns explain how to assemble objects
 and classes into larger structures while keeping these structures flexible and efficient.
 
-- **[Adapter](https://refactoring.guru/design-patterns/adapter/)**: Allows objects with incompatible interfaces to collaborate.
+### [Adapter](https://refactoring.guru/design-patterns/adapter/)
+**Brief**: Allows objects with incompatible interfaces to collaborate.
 
-- **[Bridge](https://refactoring.guru/design-patterns/bridge/)**: Lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation—which can be developed independently of each other.
+![Adapter_brief](./Resources/Design_patterns/Adapter_brief.png)
 
-- **[Composite](https://refactoring.guru/design-patterns/composite/)**: Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
+An adapter converts the interface of one object so another can understand it.
+1. The adapter gest an interface, compatible with one of the existing objects.
+2. Using this interface, the existing object can call the adapter's methods.
+3. Upon a call, the adapter passes the request to the second object, but in a format and order that the second object expects.
 
-- **[Decorator](https://refactoring.guru/design-patterns/decorator/)**: Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+> [!NOTE]
+> Sometimes its possible to create a two-way adapter that can convert calls in both directions.
 
-- **[Facade](https://refactoring.guru/design-patterns/facade/)**: Provides a simplified interface to a library, a framework, or any other complex set of classes.
+**Structure**
 
-- **[Flyweight](https://refactoring.guru/design-patterns/flyweight/)**: Lets you fit more objects into the available amount of RAM by sharing common parts of the state between multiple objects instead of keeping all of the data in each object.
+***Object adapter***
 
-- **[Proxy](https://refactoring.guru/design-patterns/proxy/)**: Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
+![Object_adapter_structure](./Resources/Design_patterns/Object_adapter_structure.png)
+
+1. The **Client** class contains the existing business logic of the program.
+2. The **Client interface** describes the protocol to interact with the Client code.
+3. The client cant use the **Service** class directly because it has an incompatible interface.
+4. The **Adapter** implements the client interface and wraps the service object. It receives calls from the client and translates them into calls to the wrapped service.
+5. The client code doesn't get coupled to the concrete adapter (as long as it works via the client interface). This allows to change the adapter without changing the client code.
+
+***Class Adapter***
+
+![Class_adapter_structure](./Resources/Design_patterns/Class_adapter_structure.png)
+1. The **Class Adapter** doesn't need to wrap any object because it inherits its behaviors from both the client and the service. The adaption happens withing the overridden methods. The resulting adapter can be used in place of the client class.
+
+**Applicability**
+- Use some existing class, when the the interface is not compatible with the rest of the code.
+  - It creates a middle-layer class that acts as a translator between your code and any other class (legacy, 3rd party, etc).
+- Reuse several existing sub-classes that lack a common functionality that can't be added to the super-class.
+  - Allows to extend each sub-class and put the missing functionality into new child classes. The downside is that you need to duplicate the code across all of these new classes ([code smell](https://refactoring.guru/smells/duplicate-code)).
+
+**Pros and cons**
+- ✅ *Single responsibility principle*. You can separate the interface or data conversion code from the primary business logic.
+- ✅ *Open/closed principle*. You can introduce new types of adapters without changing the client code.
+- ❌ The complexity of the code increases. Sometimes is simpler to change the service class to match the client's interface.
+
+### [Bridge](https://refactoring.guru/design-patterns/bridge/)
+Lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation—which can be developed independently of each other.
+
+### [Composite](https://refactoring.guru/design-patterns/composite/)
+Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
+
+### [Decorator](https://refactoring.guru/design-patterns/decorator/)
+Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+
+### [Facade](https://refactoring.guru/design-patterns/facade/)
+**Brief**: Provides a simplified interface to a library, a framework, or any other complex set of classes.
+
+![Facade_brief](./Resources/Design_patterns/Facade_brief.png)
+
+**Structure**
+![Facade_structure](./Resources/Design_patterns/Facade_structure.png)
+1. The **Facade** provides an access to a particular part of the subsystem functionality.
+2. The **Additional Facade** is used to prevent polluting a single facade with unrelated features, which make it yet another complex structure.
+3. The **Complex Subsystem** contains various objects. Its not aware of the facade existence.
+4. The **Client** uses the facade instead of calling the subsystem objects directly.
+
+**Applicability**
+- Provide a simple interface to a complex subsystem.
+  - Overtime a subsystem may become more flexible and easier to reuse in various context, but the amount of configuration and boilerplate may grow. The facade attempt to fix this problem.
+- Structure a subsystem into layers.
+  - Define entry points in the facade to each level of a subsystem. 
+  - You can reduce coupling between subsystems by making them communicate only through facades.
+    - *Example*: broke down a video conversion framework into video and audio facades).
+
+**Pros and cons**
+- ✅ You can isolate your code from the complexity of a subsystem.
+- ❌ Can become a [god object](https://en.wikipedia.org/wiki/God_object) coupled to all classes of an app.
+
+### [Flyweight](https://refactoring.guru/design-patterns/flyweight/)
+**Brief**: Lets you fit more objects into the available amount of RAM by sharing common parts of the state between multiple objects instead of keeping all of the data in each object.
+
+
+
+### [Proxy](https://refactoring.guru/design-patterns/proxy/)
+Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
 
 ## Behavioral design patterns
 Behavioral design patterns are concerned with algorithms and
 the assignment of responsibilities between objects.
 
-- **[Chain of responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility/)**: Lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
+### [Chain of responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility/)
+Lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
 
-- **[Command](https://refactoring.guru/design-patterns/command/)**: Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as method arguments, delay or queue a request's execution, and support undo-able operations.
+### [Command](https://refactoring.guru/design-patterns/command/)
+Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as method arguments, delay or queue a request's execution, and support undo-able operations.
 
-- **[Iterator](https://refactoring.guru/design-patterns/iterator/)**: Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
+### [Iterator](https://refactoring.guru/design-patterns/iterator/)
+Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 
-- **[Mediator](https://refactoring.guru/design-patterns/mediator/)**: Lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
+### [Mediator](https://refactoring.guru/design-patterns/mediator/)
+Lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
 
-- **[Memento](https://refactoring.guru/design-patterns/memento/)**: Lets you save and restore the previous state of an object without revealing the details of its implementation.
+### [Memento](https://refactoring.guru/design-patterns/memento/)
+Lets you save and restore the previous state of an object without revealing the details of its implementation.
 
-- **[Observer](https://refactoring.guru/design-patterns/observer/)**: Lets you define a subscription mechanism to notify multiple objects about any events that happen to the object 
+### [Observer](https://refactoring.guru/design-patterns/observer/)
+Lets you define a subscription mechanism to notify multiple objects about any events that happen to the object 
 they're observing.
 
-- **[State](https://refactoring.guru/design-patterns/state/)**: Lets an object alters its behavior when its internal state changes. It appears as if the object changed its class.
+### [State](https://refactoring.guru/design-patterns/state/)
+Lets an object alters its behavior when its internal state changes. It appears as if the object changed its class.
 
-- **[Strategy](https://refactoring.guru/design-patterns/strategy/)**: Lets you define a family of algorithms, put each of them into a separate class and make their objects interchangeable.
+### [Strategy](https://refactoring.guru/design-patterns/strategy/)
+Lets you define a family of algorithms, put each of them into a separate class and make their objects interchangeable.
 
-- **[Template Method](https://refactoring.guru/design-patterns/template-method/)**: Defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the 
-algorithm without changing its structure.
+### [Template Method](https://refactoring.guru/design-patterns/template-method/)
+Defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the algorithm without changing its structure.
 
-- **[Visitor](https://refactoring.guru/design-patterns/visitor/)**: Lets you separate algorithms from the objects on which they operate.
+### [Visitor](https://refactoring.guru/design-patterns/visitor/)
+**Brief**: Lets you separate algorithms from the objects on which they operate.
 
 ___
-**Acknowledgement**: Most of this is based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
+**Acknowledgement**: This notes are based on the work of the [Refactoring Guru Team](https://refactoring.guru/).
