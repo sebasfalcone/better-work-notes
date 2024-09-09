@@ -718,7 +718,9 @@ They provide various object creation mechanisms which increase flexibility and r
 
 ### [Factory](https://refactoring.guru/design-patterns/factory-method/)
 **Brief**: Provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created.
+
 **Structure**
+
 ![Factory](./Resources/Design_patterns/Factory.png)
 
 1. The **Product** is an interface, which is common to all objects produced.
@@ -740,10 +742,35 @@ They provide various object creation mechanisms which increase flexibility and r
 - ❌ It may add complexity to the codebase by increasing the number of classes (subclasses needed to implement the pattern).
 
 ### [Abstract factory](#https://refactoring.guru/design-patterns/abstract-factory/)
-Produce families of related objects without specifying their concrete classes.
+**Brief**: Produce families of related objects without specifying their concrete classes.
 
 ### [Builder](#https://refactoring.guru/design-patterns/builder/)
-Construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
+**Brief**: Construct complex objects step by step. Allows you to produce different types and representations of an object using the same construction code.
+
+**Structure**
+
+![Builder_structure](./Resources/Design_patterns/Builder_structure.png)
+
+1. The **Builder** interface declares product construction steps that are common to all types of builders.
+2. **Concrete builders** Provide different implementations of the construction steps (may produce products that don't follow the common interface).
+3. **Products** are resulting objects. Products constructed by different builders don't have to belong to the same class hierarchy or interface.
+4. The **Director** defines the order in which to call the construction steps.
+5. The **Client** must associate one of the builders with the director. Its usually via parameters of the director's constructor.
+
+**Applicability**
+- Get rid of a *telescopic constructor*.
+  - This is to provide default values to parameters not provided (instead you can use the builder to set only the parameters you need).
+- Create different representations of the same product.
+  - This can be applied when those representation involve similar steps.
+- To construct composite trees or other complex objects.
+  - The pattern lets you construct products step by step. You can defer execution of some steps without breaking the final product.
+  - A builder doesn’t expose the unfinished product while running construction steps. This prevents the client code from fetching an incomplete result.
+
+**Pros and cons**
+- ✅ You can construct objects step by step, defer construction steps or run steps recursively.
+- ✅ You can reuse the same constructor for various representations of the same product.
+- ✅ *Single responsibility principle*. You can isolate complex construction code from the business logic of the product.
+- ❌ The pattern requires creating a lot of new classes, increasing complexity.
 
 ### [Prototype](#https://refactoring.guru/design-patterns/prototype/)
 Lets you copy existing objects without making your code dependent on their classes.
@@ -797,7 +824,42 @@ An adapter converts the interface of one object so another can understand it.
 - ❌ The complexity of the code increases. Sometimes is simpler to change the service class to match the client's interface.
 
 ### [Bridge](https://refactoring.guru/design-patterns/bridge/)
-Lets you split a large class or a set of closely related classes into two separate hierarchies—abstraction and implementation—which can be developed independently of each other.
+**Brief**: It lets you decouple an abstraction from its implementation so that the two can vary independently.
+
+> Problem
+>
+> ![Bridge_brief_problem](./Resources/Design_patterns/Bridge_brief_problem.png)
+
+> Solution
+>
+> ![Bridge_brief_solution](./Resources/Design_patterns/Bridge_brief_solution.png)
+
+- **Abstraction (interface)**
+  - Its the high-level control layer. 
+  - It isn't supposed to do any real work on its own. 
+  - It should delegate the work to the *implementation (platform)* layer.
+  - It can be think as the GUI and the implementation as the API the GUI uses.
+
+**Structure**
+![Bridge_structure](./Resources/Design_patterns/Bridge_structure.png)
+
+1. The **Abstraction** provides the high-level control logic. It relies on the implementation object to do the actual work.
+2. The **Implementation** declares the interface.
+3. The **Concrete implementations** contain platform-specific code.
+4. The **Refined abstractions (optional)** provide variants of control logic. 
+5. The **Client** links to the abstraction layer.
+
+**Applicability**
+- Divide and organize a monolithic class that has several variants of some functionality (example, the class works with various database servers).
+- Extend a class in several independent dimensions.
+- Switch implementations at runtime.
+
+**Pros and cons**
+- ✅ You can create platform-independent classes and apps.
+- ✅ The client code works with high-level abstractions. It isn't exposed to the platform-specific code.
+- ✅ *Single responsibility principle*. You can focus on high-level logic in the abstraction and on platform-specific details in the implementation.
+- ✅ *Open/closed principle*. You can introduce new abstractions and implementations independently from each other.
+- ❌ Code may become more complex if applied to a highly cohesive class.
 
 ### [Composite](https://refactoring.guru/design-patterns/composite/)
 Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
@@ -811,7 +873,9 @@ Lets you attach new behaviors to objects by placing these objects inside special
 ![Facade_brief](./Resources/Design_patterns/Facade_brief.png)
 
 **Structure**
+
 ![Facade_structure](./Resources/Design_patterns/Facade_structure.png)
+
 1. The **Facade** provides an access to a particular part of the subsystem functionality.
 2. The **Additional Facade** is used to prevent polluting a single facade with unrelated features, which make it yet another complex structure.
 3. The **Complex Subsystem** contains various objects. Its not aware of the facade existence.
@@ -832,7 +896,35 @@ Lets you attach new behaviors to objects by placing these objects inside special
 ### [Flyweight](https://refactoring.guru/design-patterns/flyweight/)
 **Brief**: Lets you fit more objects into the available amount of RAM by sharing common parts of the state between multiple objects instead of keeping all of the data in each object.
 
+**Definitions**
 
+- ***Intrinsic state (immutability)***: Since the flyweight object is shared between multiple contexts, it must be immutable. Values are set in the constructor and no setter or public field is exposed to other objects.
+
+- ***Extrinsic state***: The state that is stored outside the flyweight object and passed to it when needed.
+
+- ***Flyweight factory***: Manages a pool of existing flyweight objects. When the client requests a flyweight, the factory either returns an existing instance or creates a new one, if it doesn't exist.
+
+**Structure**
+
+![Flyweight_structure](./Resources/Design_patterns/Flyweight_structure.png)
+
+1. Its just an optimization pattern, before applying it, make sure that the programs does have a problem with RAM consumption.
+2. The **Flyweight** class contains the object's state that can be shared between multiple objects. The state stored inside is called **intrinsic**.
+3. The **Context** contains the extrinsic state, unique for each object.
+4. The original behavior can be move to the flyweight class, but the context object should be passed as a parameter. Or it can be moved to the context, which would use the flyweight object as a data object.
+5. The **Client** calculates or stores the extrinsic state.
+6. The **Flyweight factory** manages the pool of flyweight objects.
+
+**Application**
+- Use only when a program must support a huge number of objects that barely fit into RAM. Is most usefull when:
+  - An applications need to spawn a huge number of similar objects.
+  - This objects would consume all available RAM.
+  - The objects contain duplicated states that can be extracted.
+
+**Pros and cons**
+- ✅ Saves RAM by sharing common parts of the state between multiple objects.
+- ❌ You might trade RAM over CPU cycles when the context data needs to be recalculated each time.
+- ❌ The code becomes more complex (its not intuitive to split the state).
 
 ### [Proxy](https://refactoring.guru/design-patterns/proxy/)
 Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
