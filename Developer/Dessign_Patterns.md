@@ -915,8 +915,8 @@ Lets you attach new behaviors to objects by placing these objects inside special
 5. The **Client** calculates or stores the extrinsic state.
 6. The **Flyweight factory** manages the pool of flyweight objects.
 
-**Application**
-- Use only when a program must support a huge number of objects that barely fit into RAM. Is most usefull when:
+**Applicability**
+- Use only when a program must support a huge number of objects that barely fit into RAM. Is most useful when:
   - An applications need to spawn a huge number of similar objects.
   - This objects would consume all available RAM.
   - The objects contain duplicated states that can be extracted.
@@ -928,6 +928,40 @@ Lets you attach new behaviors to objects by placing these objects inside special
 
 ### [Proxy](https://refactoring.guru/design-patterns/proxy/)
 Lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
+
+![Proxy_brief](./Resources/Design_patterns/Proxy_brief.png)
+
+**Structure**
+
+![Proxy_structure](./Resources/Design_patterns/Proxy_structure.png)
+
+1. The proxy must follow the **Service Interface**, to disguise itself as the real service object.
+2. The **Service** class has the business logic.
+3. The **Proxy** class has a reference to the service object. After the proxy finishes its work, it passes the request to the service object. Usually, the proxy manages the lifecycle of the service object.
+4. The **Client** works with both the service and the proxy.
+
+**Applicability**
+- **Lazy initialization (virtual proxy)**: When you have a heavy service object that is needed from time to time.
+  - Instead of creating the object at the start of the program, you can delay its creation until the moment it's really needed.
+- **Access control (protection proxy)**: When you need to have different access rights to the service object.
+  - The proxy can check the access rights before passing the request to the service. 
+- **Local execution of a remote service (remote proxy)**: When the service object is located on a remote server.
+  - The proxy can handle the network connection and data serialization, so the client can work with the service as if it were a local object.
+- **Logging requests (logging proxy)**: When you want to keep a history of requests to the service object.
+  - The proxy can log each request before passing it to the service.
+- **Caching results (caching proxy)**: When you need to cache results of the service object.
+  - The proxy can store the results of the requests and reuse them later.
+- **Smart reference**: When you to dismiss the service object when there are no clients.
+  - The proxy can track the references to the service object and dismiss it when there are no clients.
+
+**Pros and cons**
+- ✅ You can control the service object without the client knowing about it.
+- ✅ You can manage the lifecycle of the service object.
+- ✅ The proxy works even if the service object isn't ready or is not available.
+- ✅ *Open/closed principle*. You can introduce new proxies without changing the service or the client.
+- ❌ The code may become more complex since you need to introduce a lot of new classes.
+- ❌ The response from the service might be delayed.
+
 
 ## Behavioral design patterns
 Behavioral design patterns are concerned with algorithms and
