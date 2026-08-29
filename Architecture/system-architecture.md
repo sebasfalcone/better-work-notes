@@ -1,14 +1,65 @@
 # Systems architecture notes
+- [Systems architecture notes](#systems-architecture-notes)
+  - [Architecture Design patterns](#architecture-design-patterns)
+    - [Circuit Breaker Pattern](#circuit-breaker-pattern)
+    - [Event Sourcing Pattern](#event-sourcing-pattern)
+    - [SideCar Pattern](#sidecar-pattern)
+    - [CQRS](#cqrs)
+    - [Rate Limiting Pattern](#rate-limiting-pattern)
+    - [Strangler Fig](#strangler-fig)
+    - [Health Endpoint Monitoring Pattern](#health-endpoint-monitoring-pattern)
+    - [Messaging patterns](#messaging-patterns)
+      - [Asynchronous Request Replay Pattern](#asynchronous-request-replay-pattern)
+        - [Useful for](#useful-for)
+      - [Not great for](#not-great-for)
+    - [Publisher-Subscriber pattern](#publisher-subscriber-pattern)
+      - [Issues](#issues)
+      - [Useful for](#useful-for-1)
+      - [Not great for](#not-great-for-1)
+    - [Competing Consumers pattern](#competing-consumers-pattern)
+      - [Solution](#solution)
+      - [Issues](#issues-1)
+      - [Useful for](#useful-for-2)
+      - [Not so great for](#not-so-great-for)
+- [Foot-notes](#foot-notes)
+  - [Data Storage patterns](#data-storage-patterns)
+  - [Caching Patterns](#caching-patterns)
+  - [Communication Patterns](#communication-patterns)
+  - [Reliability Patterns](#reliability-patterns)
+    - [Circuit breaker](#circuit-breaker)
+      - [When to use](#when-to-use)
+      - [Trade-off](#trade-off)
+    - [Retry with exponential backoff](#retry-with-exponential-backoff)
+      - [When to use](#when-to-use-1)
+      - [Trade-off](#trade-off-1)
+    - [Bulkhead](#bulkhead)
+      - [When to use](#when-to-use-2)
+      - [Trade-off](#trade-off-2)
+    - [Timeout](#timeout)
+      - [When to use](#when-to-use-3)
+      - [Trade-off](#trade-off-3)
+    - [Idempotency](#idempotency)
+      - [When to use](#when-to-use-4)
+      - [Trade-off](#trade-off-4)
+    - [Dead Letter Queue (DLQ)](#dead-letter-queue-dlq)
+      - [When to use](#when-to-use-5)
+      - [Tradeoff](#tradeoff)
+    - [Graceful degradation](#graceful-degradation)
+      - [When to use](#when-to-use-6)
+    - [Trade-off](#trade-off-5)
+  - [Scaling Patterns](#scaling-patterns)
+  - [Data Processing Patterns](#data-processing-patterns)
+  - [API Design Patterns](#api-design-patterns)
+  - [Infrastructure Patterns](#infrastructure-patterns)
+  - [Consistency Patterns](#consistency-patterns)
+  - [Observability and Operations Patterns](#observability-and-operations-patterns)
 
-## [Architecture Design patterns](https://web3usecase.co/7-architecture-design-patterns-you-wish-you-knew-before-interview-e9806bc01b6f)
-Architecture Design Patterns, in a nutshell, are design patterns for High Level Design.
+## Architecture Design patterns
+Based on the following sources:
+- https://web3usecase.co/7-architecture-design-patterns-you-wish-you-knew-before-interview-e9806bc01b6f
+- https://designgurus.substack.com/p/50-system-design-patterns-every-engineer?utm_source=publication-search
 
 ### Circuit Breaker Pattern
-*Prevents an application from continually attempting to execute an action that is likely to fail*, allowing it to proceed without waiting for the problem to be corrected or spending CPU cycles while determining the fault's duration.
-
-*Allows an application to determine whether or not the issue has been remedied*. If the problem appears to be resolved, the program can attempt to perform the operation.
-
-*Prohibits an application from doing a risky activity*. An application can use the Retry pattern to trigger an action through a circuit breaker to combine these two patterns. The retry logic, on the other hand, should be alert to any exceptions supplied by the circuit breaker and should cease repeat attempts if the circuit breaker indicates that a fault is not temporary.
 
 ### Event Sourcing Pattern
 
@@ -111,3 +162,110 @@ To implement the communication channel between the application and the consumer 
 
 [^1]: The Service Bus pattern is a messaging pattern used in distributed systems to facilitate communication between various components or services. It involves the use of a message broker or bus that acts as an intermediary between producers and consumers of messages. <br> <br>
 The basic idea behind the pattern is that each service publishes messages to the service bus, and other services subscribe to these messages based on their specific needs. The service bus is responsible for ensuring that the messages are delivered reliably, even in the presence of failures or network outages.
+
+## Data Storage patterns
+
+## Caching Patterns
+
+## Communication Patterns
+
+## Reliability Patterns
+
+### Circuit breaker
+**Prevents an application from continually attempting to execute an action that is likely to fail**, allowing it to proceed without waiting for the problem to be corrected or spending CPU cycles while determining the fault's duration.
+
+**Allows an application to determine whether or not the issue has been remedied**. If the problem appears to be resolved, the program can attempt to perform the operation.
+
+**Prohibits an application from doing a risky activity**. An application can use the Retry pattern to trigger an action through a circuit breaker to combine these two patterns. The retry logic, on the other hand, should be alert to any exceptions supplied by the circuit breaker and should cease repeat attempts if the circuit breaker indicates that a fault is not temporary.
+
+![Circuit breaker](./Resources/Circuit_breaker.webp)
+
+#### When to use
+- Any service that depends on another service -> Prevents a failing dependency from taking down the caller.
+
+#### Trade-off
+The fallback response may be degraded (eg. cached data instead of fresh data). Requires tuning the failure threshold and recovery timeout.
+
+### Retry with exponential backoff
+When a request fails, retry after increasing delays (1 second, 2 seconds, 4 seconds, 8 seconds). Add jitter (random delay) to prevent [thundering herds](https://en.wikipedia.org/wiki/Thundering_herd_problem).[^2]
+
+#### When to use
+Any transient failure (network timeout, temporary server overload).
+
+#### Trade-off
+Retries can amplify load on already struggling services. Must set a maximum retry count to prevent infinity loops.
+
+[^2]: A performance degrading phenomenon. When a large number of processes are simultaneously awakened (typically in response to a specific event or resource availability), but only one process is able to respond to the event or access the new resource, causing most of the other processes to fail and go back to sleep. This consumes CPU and other resources, reducing overall performance and slowing the process that succeeds.
+
+### Bulkhead
+Isolate different workloads into separate resource pools. If one workflow exhausts its pool, other workflows are unaffected.
+
+[Bulkhead](./Resources/Bulkhead.webp)
+
+#### When to use
+Multi-tenant systems (isolate tenants so one cannot affect the others). Systems with mixed workloads (isolate batch processing from real-time serving).
+
+#### Trade-off
+Less efficient resource utilization (each poll has reserved capacity that sits idle during low traffic).
+
+
+### Timeout
+Set a maximum duration for every external call. If the call does not complete within the timeout, abort and return an error or fallback.
+
+#### When to use
+Every external call in a distribute system. It prevents resources starvation due to a dependency.
+
+#### Trade-off
+Setting a timeout too low causes false failures on healthy but slow responses. Setting it too high delays failure detection.
+
+
+### Idempotency
+Design operations so that executing the multiple times produces the same result as executing them once.
+
+If the client retries a payment request, the server recognizes the duplicate and return the original result without charging twice.
+
+[Idempotency](./Resources/Idempotency.webp)
+
+#### When to use
+Every write API in distributed system. Network failures make it impossible for the client to know whether the server processed the request.
+
+#### Trade-off
+Requires storing idempotency keys and checking for duplicates on every request. Adds a database lookup.
+
+
+### Dead Letter Queue (DLQ)
+When a message cannot be processed after multiple retries, move it to a separated queue instead of blocking the main queue. Failed message can be manually or automatically handled.
+
+[DLQ](./Resources/DLQ.webp)
+
+#### When to use
+Any message-driven system. Without a DLQ, a single poisonous message can block processing of all subsequent messages.
+
+#### Tradeoff
+Messages in the DLQ need monitoring and manual intervention. If ignored, the DLQ grows indefinitely.
+
+
+### Graceful degradation
+When a non-critical component fails, continue serving a degraded but functional experience instead of failing entirely.
+- The recommendation service is down? Show trending items instead of personalized recommendations.
+- The image service is slow? Show text-only content with image placeholders.
+
+[Graceful degradation](./Resources/Graceful_degradation.webp)
+
+#### When to use
+Any user-facing system with multiple subsystems of varying criticality.
+
+### Trade-off
+Requires identifying which features are critical (must work) vs non-critical (can degrade). Requires designing and testing the degraded experience.
+
+## Scaling Patterns
+
+## Data Processing Patterns
+
+## API Design Patterns
+
+## Infrastructure Patterns
+
+## Consistency Patterns
+
+## Observability and Operations Patterns
